@@ -11,6 +11,10 @@ resource "aws_organizations_organization" "this" {
 locals {
   #sets product for account and each associated policy
   account_policies = chunklist(flatten([for account in var.child_accounts : try(setproduct([account.name], account.policies), [])]), 2)
+  child_accounts = [for account in var.child_accounts: defaults(account, {
+    iam_user_access_to_billing = false
+    is_logs = false
+  })]
 }
 
 resource "aws_organizations_policy" "this" {
@@ -29,10 +33,13 @@ resource "aws_organizations_policy_attachment" "this" {
 }
 
 resource "aws_organizations_account" "this" {
-  for_each  = { for account in var.child_accounts : account.name => account }
+  for_each  = { for account in local.child_accounts : account.name => account }
   name      = each.value.name
+  parent_id = aws_organizations_organization.this[0].master_account_id
   email     = each.value.email
   role_name = each.value.role_name
+  iam_user_access_to_billing = each.value.iam_user_access_to_billing ? "ALLOW" : "DENY"
+  tags = each.value.tags
 }
 
 # resource "aws_cloudtrail" "this" {

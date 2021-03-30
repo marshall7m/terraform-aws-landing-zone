@@ -6,17 +6,16 @@ variable "create_organization" {
 
 variable "child_accounts" {
   description = "List of AWS child accounts and their respective configurations"
-  /* 
- change to below when issue: https://github.com/hashicorp/terraform/issues/19898 is fixed to allow optional map  
-    type = list(object({
-        name = string
-        email = string
-        role_name = string
-        policies = list(string)
-    }))
-*/
-  type    = any
-  default = null
+  type = list(object({
+    name = string
+    email = string
+    role_name = optional(string)
+    policies = optional(list(string))
+    tags = optional(map(string))
+    is_logs = optional(bool)
+    iam_user_access_to_billing = optional(bool)
+  }))
+  default = []
 }
 
 variable "policies" {
@@ -25,6 +24,6 @@ variable "policies" {
     name    = string
     content = string
   }))
-  default = null
+  default = []
 }
 
