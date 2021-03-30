@@ -10,6 +10,7 @@ variable "child_accounts" {
     name = string
     email = string
     role_name = optional(string)
+    parent_id = optional(string)
     policies = optional(list(string))
     tags = optional(map(string))
     is_logs = optional(bool)

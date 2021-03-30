@@ -35,7 +35,7 @@ resource "aws_organizations_policy_attachment" "this" {
 resource "aws_organizations_account" "this" {
   for_each  = { for account in local.child_accounts : account.name => account }
   name      = each.value.name
-  parent_id = aws_organizations_organization.this[0].master_account_id
+  parent_id = each.value.parent_id
   email     = each.value.email
   role_name = each.value.role_name
   iam_user_access_to_billing = each.value.iam_user_access_to_billing ? "ALLOW" : "DENY"
