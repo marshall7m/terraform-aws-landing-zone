@@ -12,7 +12,6 @@ locals {
   #sets product for account and each associated policy
   account_policies = chunklist(flatten([for account in var.child_accounts : try(setproduct([account.name], account.policies), [])]), 2)
   child_accounts = [for account in var.child_accounts: defaults(account, {
-    iam_user_access_to_billing = false
     is_logs = false
   })]
 }
@@ -38,7 +37,7 @@ resource "aws_organizations_account" "this" {
   parent_id = each.value.parent_id
   email     = each.value.email
   role_name = each.value.role_name
-  iam_user_access_to_billing = each.value.iam_user_access_to_billing ? "ALLOW" : "DENY"
+  iam_user_access_to_billing = coalesce(each.value.iam_user_access_to_billing, false) ? "ALLOW" : "DENY"
   tags = each.value.tags
 }
 
