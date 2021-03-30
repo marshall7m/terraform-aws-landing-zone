@@ -37,7 +37,7 @@ resource "aws_organizations_account" "this" {
   parent_id = each.value.parent_id
   email     = each.value.email
   role_name = each.value.role_name
-  iam_user_access_to_billing = coalesce(each.value.iam_user_access_to_billing, false) ? "ALLOW" : "DENY"
+  iam_user_access_to_billing = each.value.iam_user_access_to_billing == null ? null : each.value.iam_user_access_to_billing ? "ALLOW" : "DENY"
   tags = each.value.tags
 }
 
