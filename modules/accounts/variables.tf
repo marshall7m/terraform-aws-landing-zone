@@ -7,13 +7,13 @@ variable "create_organization" {
 variable "child_accounts" {
   description = "List of AWS child accounts and their respective configurations"
   type = list(object({
-    name = string
-    email = string
-    role_name = optional(string)
-    parent_id = optional(string)
-    policies = optional(list(string))
-    tags = optional(map(string))
-    is_logs = optional(bool)
+    name                       = string
+    email                      = string
+    role_name                  = optional(string)
+    parent_id                  = optional(string)
+    policies                   = optional(list(string))
+    tags                       = optional(map(string))
+    is_logs                    = optional(bool)
     iam_user_access_to_billing = optional(bool)
   }))
   default = []
