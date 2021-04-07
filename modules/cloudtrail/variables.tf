@@ -4,10 +4,20 @@ variable "enable_ct" {
   default     = true
 }
 
+variable "is_organization_trail" {
+  description = <<EOF
+Determines if module should create an organization CloudTrail 
+Prereqs:
+  - AWS Organization must already exists
+  - Terraform AWS provider must be configured with organization master account
+EOF
+  type = bool
+  default = false
+}
+
 variable "name" {
-  description = "Name of Cloud Trail"
+  description = "Name of CloudTrail"
   type        = string
-  default     = "org-cloud-trail"
 }
 
 variable "include_global_service_events" {
@@ -23,14 +33,20 @@ variable "ct_tags" {
 }
 
 variable "trusted_kms_admin_arns" {
-  description = "ARNs of entities that will have administrative access to KMS key associated with Cloud Trail"
+  description = "ARNs of entities that will have administrative access to CMK key associated with Cloud Trail"
   type        = list(string)
+}
+
+variable "trusted_kms_user_usage_arns" {
+  description = "ARNs of IAM users that will have the ability decrypt, read, reencrypt, and describe the CMK key"
+  type = list(string)
+  default = []
 }
 
 variable "bucket_name" {
   description = "Name of S3 bucket for Cloud Trail logs"
   type        = string
-  default     = "org-cloud-trail-logs"
+  default     = null
 }
 
 variable "key_prefix" {
@@ -42,7 +58,7 @@ variable "key_prefix" {
 variable "cw_log_group_name" {
   description = "Name of Cloud Watch log group name"
   type        = string
-  default     = "org-cloud-trail-logs"
+  default     = "cloudtrail-logs"
 }
 
 variable "log_retention_days" {
@@ -50,3 +66,14 @@ variable "log_retention_days" {
   type        = number
 }
 
+variable "aws_accounts" {
+  description = <<EOF
+AWS accounts that will write to the CloudTrail S3 bucket
+
+Prereqs:
+  - Module is not used to create organization trail (var.is_organization_trail = false)
+  - Do not turn on CloudTrail in any of the acconts specified yet
+EOF
+  type = list(string)
+  default = []
+}
