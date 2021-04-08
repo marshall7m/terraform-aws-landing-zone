@@ -44,7 +44,7 @@ resource "aws_cloudtrail" "this" {
   cloud_watch_logs_group_arn    = "${aws_cloudwatch_log_group.this.arn}:*"
   is_organization_trail         = var.is_organization_trail
   is_multi_region_trail         = true
-  kms_key_id                    = module.kms.arn
+  kms_key_id                    = module.cmk.arn
   tags                          = var.ct_tags
 }
 
@@ -60,7 +60,7 @@ module "ct_role" {
   ]
 }
 
-module "kms" {
+module "cmk" {
   providers = {
     aws = aws.s3
   }
@@ -193,7 +193,7 @@ resource "aws_cloudwatch_log_group" "this" {
   provider          = aws.s3
   name              = var.cw_log_group_name
   retention_in_days = var.log_retention_days
-  kms_key_id        = module.kms.arn
+  kms_key_id        = module.cmk.arn
 }
 
 resource "aws_iam_policy" "ct_cw" {

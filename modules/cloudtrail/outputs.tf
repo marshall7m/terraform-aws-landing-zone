@@ -3,10 +3,10 @@ output "s3_bucket_arn" {
 }
 
 output "cw_log_group_arn" {
-    value = aws_cloudwatch_log_group.arn
+    value = aws_cloudwatch_log_group.this.arn
 }
 
-output "kms_cmk" {
+output "cmk_arn" {
     value = module.cmk.arn
 }
 
