@@ -12,7 +12,7 @@
 # provider "random" {}
 
 locals {
-  bucket_name = coalesce(var.bucket_name, lower("cloudtrail-logs-${random_id.ct_s3.id}"))
+  bucket_name = coalesce(var.bucket_name, lower("cloudtrail-logs-${random_uuid.ct_s3.id}"))
   key_prefix = var.key_prefix != null ? "${var.key_prefix}/" : ""
 }
 
@@ -142,9 +142,7 @@ module "cmk" {
   ] : [])
 }
 
-resource "random_id" "ct_s3" {
-  byte_length = 8
-}
+resource "random_uuid" "ct_s3" {}
 
 resource "aws_s3_bucket" "this" {
   provider      = aws.s3
