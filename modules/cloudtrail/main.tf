@@ -9,8 +9,8 @@ data "aws_caller_identity" "s3" {
   provider = aws.s3
 }
 
-data "aws_region" "s3" {
-  provider = aws.s3
+data "aws_region" "ct" {
+  provider = aws.ct
 }
 
 data "aws_caller_identity" "ct" {
