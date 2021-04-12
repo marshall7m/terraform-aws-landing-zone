@@ -193,7 +193,7 @@ resource "aws_iam_policy" "ct" {
 }
 
 data "aws_iam_policy_document" "ct" {
-  provider = aws.s3
+  provider = aws.ct
 
   statement {
     sid = "CloudTrailCreateStreamAccess"
