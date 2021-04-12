@@ -1,16 +1,5 @@
 #TODO: Create provider docs explaining when to provide the same provider
 
-# Provider to provision CloudTrail in
-# provider "aws" {
-#   alias = "ct"
-# }
-
-# provider "aws" {
-#   alias = "s3"
-# }
-
-# provider "random" {}
-
 locals {
   bucket_name = coalesce(var.bucket_name, lower("cloudtrail-logs-${random_uuid.ct_s3.id}"))
   key_prefix = var.key_prefix != null ? "${var.key_prefix}/" : ""
@@ -46,6 +35,11 @@ resource "aws_cloudtrail" "this" {
   is_multi_region_trail         = true
   kms_key_id                    = module.cmk.arn
   tags                          = var.ct_tags
+
+  depends_on = [
+    aws_s3_bucket.this,
+    module.cmk
+  ]
 }
 
 module "ct_role" {
@@ -66,8 +60,8 @@ module "cmk" {
   }
   source             = "github.com/marshall7m/terraform-aws-kms/modules//cmk"
   account_id         = tostring(data.aws_caller_identity.ct.id)
-  trusted_admin_arns = var.trusted_kms_admin_arns
-  # trusted_user_usage_arns = var.trusted_kms_user_usage_arns
+  trusted_admin_arns = var.trusted_iam_kms_admin_arns
+  trusted_user_usage_arns = var.trusted_iam_kms_usage_arns
   
   trusted_service_usage_principals = ["logs.us-west-2.amazonaws.com"]
   #explicitly only allow the cw log group created in this module to access key
@@ -96,7 +90,8 @@ module "cmk" {
         {
           test = "StringLike"
           variable = "kms:EncryptionContext:aws:cloudtrail:arn"
-          values = ["arn:aws:cloudtrail:*:${data.aws_caller_identity.s3.id}:trail/*"]
+          # TODO: see if explicit cross-account arns are needed for organization trail
+          values = ["arn:aws:cloudtrail:*:${data.aws_caller_identity.ct.id}:trail/*"]
         }
       ]
     }, 
@@ -112,32 +107,27 @@ module "cmk" {
       actions = ["kms:DescribeKey"]
       resources = ["*"]
     }],
-    length(var.trusted_kms_user_usage_arns) > 0 ? [{
-      sid = "CloudTrailCrossAccountDecryption"
-      effect = "Allow",
+    length(var.trusted_iam_kms_decrypt_arns) > 0 ? [{
+      sid = "CloudTrailDecryptionAccess"
+      effect = "Allow"
       principals = [
         {
           type = "AWS"
-          identifiers = var.trusted_kms_user_usage_arns
+          identifiers = var.trusted_iam_kms_decrypt_arns
         }
       ]
       actions = [
-        "kms:Decrypt",
-        "kms:ReEncryptFrom"
+        "kms:Decrypt"
       ],
       resources = ["*"]
+      # principals can only perform actions if kms encryption context associated with cloudtrail is not null
       conditions = [
-        # {
-        #   test = "StringEquals"
-        #   variable = "kms:CallerAccount"
-        #   values = var.aws_accounts
-        # },
         {
-          test = "StringLike"
+          test = "Null"
           variable = "kms:EncryptionContext:aws:cloudtrail:arn"
-          values = ["arn:aws:cloudtrail:*:${data.aws_caller_identity.ct.id}:trail/*"]
+          values = ["false"]
         }
-      ] 
+      ]
     }
   ] : [])
 }

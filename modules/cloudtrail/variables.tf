@@ -32,13 +32,19 @@ variable "ct_tags" {
   default     = {}
 }
 
-variable "trusted_kms_admin_arns" {
-  description = "ARNs of entities that will have administrative access to CMK key associated with Cloud Trail"
+variable "trusted_iam_kms_admin_arns" {
+  description = "ARNs of IAM entities that will have administrative access to CMK key associated with Cloud Trail"
   type        = list(string)
 }
 
-variable "trusted_kms_user_usage_arns" {
-  description = "ARNs of IAM users that will have the ability decrypt, read, reencrypt, and describe the CMK key"
+variable "trusted_iam_kms_usage_arns" {
+  description = "ARNs of IAM entities that will have the ability decrypt, read, reencrypt, and describe the CMK key"
+  type = list(string)
+  default = []
+}
+
+variable "trusted_iam_kms_decrypt_arns" {
+  description = "ARNs of IAM entities that will have the ability to only decrypt the CMK key via it's associated AWS account's CloudTrail"
   type = list(string)
   default = []
 }
