@@ -69,7 +69,7 @@ module "cmk" {
       test     = "ArnLike"
       variable = "kms:EncryptionContext:aws:logs:arn"
       values = [
-        "arn:aws:logs:${data.aws_region.s3.name}:${data.aws_caller_identity.s3.id}:log-group:${var.cw_log_group_name}"
+        "arn:aws:logs:${data.aws_region.ct.name}:${data.aws_caller_identity.ct.id}:log-group:${var.cw_log_group_name}"
       ]
     }
   ]
