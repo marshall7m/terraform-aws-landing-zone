@@ -180,7 +180,7 @@ data "aws_iam_policy_document" "ct_bucket" {
 }
 
 resource "aws_cloudwatch_log_group" "this" {
-  provider          = aws.s3
+  provider          = aws.ct
   name              = var.cw_log_group_name
   retention_in_days = var.log_retention_days
   kms_key_id        = module.cmk.arn
