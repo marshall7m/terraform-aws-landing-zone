@@ -50,7 +50,7 @@ module "ct_role" {
   role_name        = var.name
   trusted_services = ["cloudtrail.amazonaws.com"]
   custom_role_policy_arns = [
-    aws_iam_policy.ct_cw.arn
+    aws_iam_policy.ct.arn
   ]
 }
 
@@ -137,6 +137,9 @@ resource "aws_s3_bucket" "this" {
   provider      = aws.s3
   bucket        = local.bucket_name
   force_destroy = true
+  versioning {
+    enabled = true
+  }
 
   policy = data.aws_iam_policy_document.ct_bucket.json
 }
@@ -183,13 +186,13 @@ resource "aws_cloudwatch_log_group" "this" {
   kms_key_id        = module.cmk.arn
 }
 
-resource "aws_iam_policy" "ct_cw" {
+resource "aws_iam_policy" "ct" {
   provider = aws.ct
-  name     = "${var.name}-cw-access"
-  policy   = data.aws_iam_policy_document.ct_cw.json
+  name     = var.name
+  policy   = data.aws_iam_policy_document.ct.json
 }
 
-data "aws_iam_policy_document" "ct_cw" {
+data "aws_iam_policy_document" "ct" {
   provider = aws.s3
 
   statement {
