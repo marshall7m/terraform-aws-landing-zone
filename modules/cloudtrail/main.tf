@@ -1,7 +1,7 @@
 #TODO: Create provider docs explaining when to provide the same provider
 
 locals {
-  bucket_name = coalesce(var.bucket_name, lower("cloudtrail-logs-${random_uuid.ct_s3.id}"))
+  bucket_name = coalesce(var.bucket_name, lower("cloudtrail-logs-${random_uuid.ct_bucket.id}"))
   key_prefix = var.key_prefix != null ? "${var.key_prefix}/" : ""
 }
 
@@ -59,7 +59,6 @@ module "cmk" {
     aws = aws.s3
   }
   source             = "github.com/marshall7m/terraform-aws-kms/modules//cmk"
-  account_id         = tostring(data.aws_caller_identity.ct.id)
   trusted_admin_arns = var.trusted_iam_kms_admin_arns
   trusted_user_usage_arns = var.trusted_iam_kms_usage_arns
   
@@ -132,17 +131,17 @@ module "cmk" {
   ] : [])
 }
 
-resource "random_uuid" "ct_s3" {}
+resource "random_uuid" "ct_bucket" {}
 
 resource "aws_s3_bucket" "this" {
   provider      = aws.s3
   bucket        = local.bucket_name
   force_destroy = true
 
-  policy = data.aws_iam_policy_document.ct_s3.json
+  policy = data.aws_iam_policy_document.ct_bucket.json
 }
 
-data "aws_iam_policy_document" "ct_s3" {
+data "aws_iam_policy_document" "ct_bucket" {
   provider = aws.s3
 
   statement {
@@ -186,7 +185,7 @@ resource "aws_cloudwatch_log_group" "this" {
 
 resource "aws_iam_policy" "ct_cw" {
   provider = aws.ct
-  name     = "cloudtrail-${var.name}-cw-access"
+  name     = "${var.name}-cw-access"
   policy   = data.aws_iam_policy_document.ct_cw.json
 }
 
