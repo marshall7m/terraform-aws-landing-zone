@@ -105,6 +105,24 @@ module "cmk" {
       ]
       actions = ["kms:DescribeKey"]
       resources = ["*"]
+    },
+    {
+      sid    = "CloudTrailUsage"
+      effect = "Allow"
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ]
+      principals = [
+        {
+          type        = "Service"
+          identifiers = ["cloudtrail.amazonaws.com"]
+        }
+      ]
+      resources = ["*"]
     }],
     length(var.trusted_iam_kms_decrypt_arns) > 0 ? [{
       sid = "CloudTrailDecryptionAccess"
@@ -175,6 +193,17 @@ data "aws_iam_policy_document" "ct_bucket" {
       test     = "StringEquals"
       variable = "s3:x-amz-acl"
       values   = ["bucket-owner-full-control"]
+    }
+  }
+  
+  statement {
+    sid = "DenyUnEncryptedObjectUploads"
+    actions   = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::${local.bucket_name}"]
+    condition {
+      test = "StringNotEquals"
+      variable = "s3:x-amz-server-side-encryption" 
+      values = [module.cmk.arn]
     }
   }
 }
