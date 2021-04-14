@@ -1,11 +1,8 @@
 resource "aws_organizations_organization" "this" {
   count = var.create_organization ? 1 : 0
-  aws_service_access_principals = [
-    "cloudtrail.amazonaws.com",
-    "config.amazonaws.com"
-  ]
+  aws_service_access_principals = var.aws_service_access_principals
 
-  feature_set = "ALL"
+  feature_set = var.feature_set
 }
 
 locals {

@@ -28,3 +28,18 @@ variable "policies" {
   default = []
 }
 
+variable "feature_set" {
+  description = <<EOF
+If `ALL` is used, the AWS organization will integrate all AWS management features. If 
+`CONSOLIDATED_BILLING` is used, the AWS organization will integrate basic AWS management features.
+See for more info: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_org_support-all-features.html
+EOF
+  type = string
+  default = "ALL"
+}
+
+variable "aws_service_access_principals" {
+  description = "AWS service principals to integrate into AWS organization"
+  type = list(string)
+  default = []
+}
