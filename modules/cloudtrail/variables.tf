@@ -11,8 +11,8 @@ Prereqs:
   - AWS Organization must already exists
   - Terraform AWS provider must be configured with organization master account
 EOF
-  type = bool
-  default = false
+  type        = bool
+  default     = false
 }
 
 variable "name" {
@@ -39,14 +39,14 @@ variable "trusted_iam_kms_admin_arns" {
 
 variable "trusted_iam_kms_usage_arns" {
   description = "ARNs of IAM entities that will have the ability decrypt, read, reencrypt, and describe the CMK key"
-  type = list(string)
-  default = []
+  type        = list(string)
+  default     = []
 }
 
 variable "trusted_iam_kms_decrypt_arns" {
   description = "ARNs of IAM entities that will have the ability to only decrypt the CMK key via it's associated AWS account's CloudTrail"
-  type = list(string)
-  default = []
+  type        = list(string)
+  default     = []
 }
 
 variable "bucket_name" {
@@ -80,6 +80,6 @@ Prereqs:
   - Module is not used to create organization trail (var.is_organization_trail = false)
   - Do not turn on CloudTrail in any of the acconts specified yet
 EOF
-  type = list(string)
-  default = []
+  type        = list(string)
+  default     = []
 }

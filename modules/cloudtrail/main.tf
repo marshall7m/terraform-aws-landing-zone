@@ -2,7 +2,7 @@
 
 locals {
   bucket_name = coalesce(var.bucket_name, lower("cloudtrail-logs-${random_uuid.ct_bucket.id}"))
-  key_prefix = var.key_prefix != null ? "${var.key_prefix}/" : ""
+  key_prefix  = var.key_prefix != null ? "${var.key_prefix}/" : ""
 }
 
 data "aws_caller_identity" "s3" {
@@ -18,7 +18,7 @@ data "aws_caller_identity" "ct" {
 }
 
 data "aws_organizations_organization" "this" {
-  count = var.is_organization_trail ? 1 : 0
+  count    = var.is_organization_trail ? 1 : 0
   provider = aws.ct
 }
 
@@ -27,7 +27,7 @@ resource "aws_cloudtrail" "this" {
   enable_logging                = var.enable_ct
   name                          = var.name
   s3_bucket_name                = aws_s3_bucket.this.id
-  s3_key_prefix = var.key_prefix
+  s3_key_prefix                 = var.key_prefix
   include_global_service_events = var.include_global_service_events
   cloud_watch_logs_role_arn     = module.ct_role.role_arn
   cloud_watch_logs_group_arn    = "${aws_cloudwatch_log_group.this.arn}:*"
@@ -58,10 +58,10 @@ module "cmk" {
   providers = {
     aws = aws.s3
   }
-  source             = "github.com/marshall7m/terraform-aws-kms/modules//cmk"
-  trusted_admin_arns = var.trusted_iam_kms_admin_arns
+  source                  = "github.com/marshall7m/terraform-aws-kms/modules//cmk"
+  trusted_admin_arns      = var.trusted_iam_kms_admin_arns
   trusted_user_usage_arns = var.trusted_iam_kms_usage_arns
-  
+
   trusted_service_usage_principals = ["logs.us-west-2.amazonaws.com"]
   #explicitly only allow the cw log group created in this module to access key
   trusted_service_usage_conditions = [
@@ -75,77 +75,102 @@ module "cmk" {
   ]
   statements = concat([
     {
-      sid = "CloudTrailEncryptLogs"
+      sid    = "CloudTrailEncryptLogs"
       effect = "Allow"
-      principals = [
-        {
-          type = "Service"
-          identifiers = ["cloudtrail.amazonaws.com"]
-        }
-      ]
-      actions = ["kms:GenerateDataKey*"]
-      resources = ["*"]
-      conditions = [
-        {
-          test = "StringLike"
-          variable = "kms:EncryptionContext:aws:cloudtrail:arn"
-          # TODO: see if explicit cross-account arns are needed for organization trail
-          values = ["arn:aws:cloudtrail:*:${data.aws_caller_identity.ct.id}:trail/*"]
-        }
-      ]
-    }, 
-    {
-      sid = "CloudTrailDescribeAccess"
-      effect = "Allow"
-      principals = [
-        {
-          type = "Service"
-          identifiers = ["cloudtrail.amazonaws.com"]
-        }
-      ]
-      actions = ["kms:DescribeKey"]
-      resources = ["*"]
-    },
-    {
-      sid    = "CloudTrailUsage"
-      effect = "Allow"
-      actions = [
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:ReEncrypt*",
-        "kms:GenerateDataKey*",
-        "kms:DescribeKey"
-      ]
       principals = [
         {
           type        = "Service"
           identifiers = ["cloudtrail.amazonaws.com"]
         }
       ]
+      actions   = ["kms:GenerateDataKey*"]
       resources = ["*"]
-    }],
-    length(var.trusted_iam_kms_decrypt_arns) > 0 ? [{
-      sid = "CloudTrailDecryptionAccess"
+      conditions = [
+        {
+          test     = "StringLike"
+          variable = "kms:EncryptionContext:aws:cloudtrail:arn"
+          # TODO: see if explicit cross-account arns are needed for organization trail
+          values = ["arn:aws:cloudtrail:*:${data.aws_caller_identity.ct.id}:trail/*"]
+        }
+      ]
+    },
+    {
+      sid    = "CloudTrailDescribeAccess"
       effect = "Allow"
       principals = [
         {
-          type = "AWS"
+          type        = "Service"
+          identifiers = ["cloudtrail.amazonaws.com"]
+        }
+      ]
+      actions   = ["kms:DescribeKey"]
+      resources = ["*"]
+    },
+    # {
+    #   sid    = "CloudTrailUsage"
+    #   effect = "Allow"
+    #   actions = [
+    #     "kms:Encrypt",
+    #     "kms:Decrypt",
+    #     "kms:ReEncrypt*",
+    #     "kms:GenerateDataKey*",
+    #     "kms:DescribeKey"
+    #   ]
+    #   principals = [
+    #     {
+    #       type        = "Service"
+    #       identifiers = ["cloudtrail.amazonaws.com"]
+    #     }
+    #   ]
+    #   resources = ["*"]
+    # },
+    {
+      sid    = "CreateAliasAccess"
+      effect = "Allow"
+      principals = [
+        {
+          type        = "AWS"
+          identifiers = ["*"]
+        }
+      ]
+      actions   = ["kms:CreateAlias"]
+      resources = ["*"]
+      conditions = [
+        {
+          test     = "StringEquals"
+          variable = "kms:ViaService"
+          values   = ["ec2.us-west-2.amazonaws.com"]
+        },
+        {
+          test     = "StringEquals"
+          variable = "kms:CallerAccount"
+          values   = [data.aws_caller_identity.s3.id]
+        }
+      ]
+    }],
+    length(var.trusted_iam_kms_decrypt_arns) > 0 ? [{
+      sid    = "CloudTrailDecryptionAccess"
+      effect = "Allow"
+      principals = [
+        {
+          type        = "AWS"
           identifiers = var.trusted_iam_kms_decrypt_arns
         }
       ]
       actions = [
-        "kms:Decrypt"
+        "kms:Decrypt",
+        "kms:ReEncryptFrom"
       ],
       resources = ["*"]
       # principals can only perform actions if kms encryption context associated with cloudtrail is not null
       conditions = [
         {
-          test = "Null"
+          test     = "Null"
           variable = "kms:EncryptionContext:aws:cloudtrail:arn"
-          values = ["false"]
+          values   = ["false"]
         }
       ]
-    }
+      }
   ] : [])
 }
 
@@ -176,34 +201,40 @@ data "aws_iam_policy_document" "ct_bucket" {
   }
 
   statement {
-    sid = "CloudTrailWriteAccess"
+    sid = "CloudTrailAccountWriteAccess"
     principals {
-          type        = "Service"
-          identifiers = ["cloudtrail.amazonaws.com"]
-        }
-    actions = ["s3:PutObject"]
-
-    resources = formatlist("arn:aws:s3:::${local.bucket_name}/${local.key_prefix}AWSLogs/%s/*",
-      var.is_organization_trail ?
-      [data.aws_organizations_organization.this[0].id] :
-      distinct(concat(var.aws_accounts, [data.aws_caller_identity.ct.id]))
-    )
-
+      type        = "Service"
+      identifiers = ["cloudtrail.amazonaws.com"]
+    }
+    actions   = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::${local.bucket_name}/${local.key_prefix}AWSLogs/${data.aws_caller_identity.ct.id}/*"]
     condition {
       test     = "StringEquals"
       variable = "s3:x-amz-acl"
       values   = ["bucket-owner-full-control"]
     }
   }
-  
+
   statement {
-    sid = "DenyUnEncryptedObjectUploads"
-    actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${local.bucket_name}"]
+    sid = "CloudTrailCrossAccountWriteAccess"
+    principals {
+      type        = "Service"
+      identifiers = ["cloudtrail.amazonaws.com"]
+    }
+    actions = [
+      "s3:PutObject"
+    ]
+
+    resources = formatlist("arn:aws:s3:::${local.bucket_name}/${local.key_prefix}AWSLogs/%s/*",
+      var.is_organization_trail ?
+      [data.aws_organizations_organization.this[0].id] :
+      setsubtract(var.aws_accounts, [data.aws_caller_identity.ct.id])
+    )
+
     condition {
-      test = "StringNotEquals"
-      variable = "s3:x-amz-server-side-encryption" 
-      values = [module.cmk.arn]
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values   = ["bucket-owner-full-control"]
     }
   }
 }
