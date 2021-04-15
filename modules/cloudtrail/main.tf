@@ -5,25 +5,25 @@ locals {
   key_prefix  = var.key_prefix != null ? "${var.key_prefix}/" : ""
 }
 
-data "aws_caller_identity" "s3" {
-  provider = aws.s3
+data "aws_caller_identity" "logs" {
+  provider = aws.logs
 }
 
 data "aws_region" "ct" {
-  provider = aws.ct
+  #provider = aws.ct
 }
 
 data "aws_caller_identity" "ct" {
-  provider = aws.ct
+  #provider = aws.ct
 }
 
 data "aws_organizations_organization" "this" {
-  count    = var.is_organization_trail ? 1 : 0
-  provider = aws.ct
+  count = var.is_organization_trail ? 1 : 0
+  #provider = aws.ct
 }
 
 resource "aws_cloudtrail" "this" {
-  provider                      = aws.ct
+  #provider                      = aws.ct
   enable_logging                = var.enable_ct
   name                          = var.name
   s3_bucket_name                = aws_s3_bucket.this.id
@@ -43,9 +43,9 @@ resource "aws_cloudtrail" "this" {
 }
 
 module "ct_role" {
-  providers = {
-    aws = aws.ct
-  }
+  # providers = {
+  #   aws = aws.ct
+  # }
   source           = "github.com/marshall7m/terraform-aws-iam/modules//iam-role"
   role_name        = var.name
   trusted_services = ["cloudtrail.amazonaws.com"]
@@ -56,7 +56,7 @@ module "ct_role" {
 
 module "cmk" {
   providers = {
-    aws = aws.s3
+    aws = aws.logs
   }
   source                  = "github.com/marshall7m/terraform-aws-kms/modules//cmk"
   trusted_admin_arns      = var.trusted_iam_kms_admin_arns
@@ -144,7 +144,7 @@ module "cmk" {
         {
           test     = "StringEquals"
           variable = "kms:CallerAccount"
-          values   = [data.aws_caller_identity.s3.id]
+          values   = [data.aws_caller_identity.logs.id]
         }
       ]
     }],
@@ -177,7 +177,7 @@ module "cmk" {
 resource "random_uuid" "ct_bucket" {}
 
 resource "aws_s3_bucket" "this" {
-  provider      = aws.s3
+  provider      = aws.logs
   bucket        = local.bucket_name
   force_destroy = true
   versioning {
@@ -188,7 +188,7 @@ resource "aws_s3_bucket" "this" {
 }
 
 data "aws_iam_policy_document" "ct_bucket" {
-  provider = aws.s3
+  provider = aws.logs
 
   statement {
     sid = "CloudTrailAclCheckAccess"
@@ -240,20 +240,20 @@ data "aws_iam_policy_document" "ct_bucket" {
 }
 
 resource "aws_cloudwatch_log_group" "this" {
-  provider          = aws.ct
+  #provider          = aws.ct
   name              = var.cw_log_group_name
   retention_in_days = var.log_retention_days
   kms_key_id        = module.cmk.arn
 }
 
 resource "aws_iam_policy" "ct" {
-  provider = aws.ct
-  name     = var.name
-  policy   = data.aws_iam_policy_document.ct.json
+  #provider = aws.ct
+  name   = var.name
+  policy = data.aws_iam_policy_document.ct.json
 }
 
 data "aws_iam_policy_document" "ct" {
-  provider = aws.ct
+  #provider = aws.ct
 
   statement {
     sid = "CloudTrailCreateStreamAccess"

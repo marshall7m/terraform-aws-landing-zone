@@ -1,5 +1,5 @@
 resource "aws_organizations_organization" "this" {
-  count = var.create_organization ? 1 : 0
+  count                         = var.create_organization ? 1 : 0
   aws_service_access_principals = var.aws_service_access_principals
 
   feature_set = var.feature_set
@@ -9,7 +9,9 @@ locals {
   #sets product for account and each associated policy
   account_policies = chunklist(flatten([for account in var.child_accounts : try(setproduct([account.name], account.policies), [])]), 2)
   child_accounts = [for account in var.child_accounts : defaults(account, {
-    is_logs = false
+    is_logs                    = false
+    role_name                  = "OrganizationAccountAccessRole"
+    iam_user_access_to_billing = false
   })]
 }
 
@@ -34,6 +36,11 @@ resource "aws_organizations_account" "this" {
   parent_id                  = each.value.parent_id
   email                      = each.value.email
   role_name                  = each.value.role_name
-  iam_user_access_to_billing = each.value.iam_user_access_to_billing == null ? null : each.value.iam_user_access_to_billing ? "ALLOW" : "DENY"
+  iam_user_access_to_billing = each.value.iam_user_access_to_billing ? "ALLOW" : "DENY"
   tags                       = each.value.tags
+
+  # There is no AWS Organizations API for reading role_name
+  lifecycle {
+    ignore_changes = [role_name]
+  }
 }
