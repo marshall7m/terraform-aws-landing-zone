@@ -24,7 +24,7 @@ data "aws_organizations_organization" "this" {
 
 resource "aws_cloudtrail" "this" {
   #provider                      = aws.ct
-  enable_logging                = var.enable_ct
+  enable_logging                = var.enable_logging
   name                          = var.name
   s3_bucket_name                = aws_s3_bucket.this.id
   s3_key_prefix                 = var.key_prefix

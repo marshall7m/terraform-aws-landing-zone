@@ -1,5 +1,5 @@
-variable "enable_ct" {
-  description = "Determines logging is enabled for Cloud Trail"
+variable "enable_logging" {
+  description = "Determines if logging is enabled for Cloud Trail"
   type        = bool
   default     = true
 }

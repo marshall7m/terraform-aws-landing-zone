@@ -22,7 +22,7 @@
 | bucket\_name | Name of S3 bucket for Cloud Trail logs | `string` | `null` | no |
 | ct\_tags | Tags for Cloud Trail | `map(string)` | `{}` | no |
 | cw\_log\_group\_name | Name of Cloud Watch log group name | `string` | `"cloudtrail-logs"` | no |
-| enable\_ct | Determines logging is enabled for Cloud Trail | `bool` | `true` | no |
+| enable\_logging | Determines if logging is enabled for Cloud Trail | `bool` | `true` | no |
 | include\_global\_service\_events | Determines if non-regional services like IAM will be logged via Cloud Trail | `bool` | `true` | no |
 | is\_organization\_trail | Determines if module should create an organization CloudTrail <br>Prereqs:<br>  - AWS Organization must already exists<br>  - Terraform AWS provider must be configured with organization master account | `bool` | `false` | no |
 | key\_prefix | S3 key prefix to put Cloud Trail logs under | `string` | `null` | no |

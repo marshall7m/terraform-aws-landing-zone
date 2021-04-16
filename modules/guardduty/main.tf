@@ -11,10 +11,12 @@ data "aws_region" "s3" {
 }
 
 locals {
-  bucket_name = coalesce(var.bucket_name, lower("guardduty-logs-${random_uuid.gd_bucket.id}"))
+  bucket_name = coalesce(var.bucket_name, lower("guardduty-logs-${random_uuid.gd_bucket[0].id}"))
 }
 
-resource "random_uuid" "gd_bucket" {}
+resource "random_uuid" "gd_bucket" {
+  count = var.bucket_name == null ? 1 : 0
+}
 
 resource "aws_guardduty_detector" "this" {
   provider = aws.gd
@@ -140,8 +142,8 @@ module "cmk" {
 
   statements = [
     {
-      sid = "GuardDutyEncryptAccess"
-			effect = "Allow"
+      sid    = "GuardDutyEncryptAccess"
+      effect = "Allow"
       actions = [
         "kms:GenerateDataKey"
       ]
@@ -161,7 +163,7 @@ module "cmk" {
 }
 
 resource "aws_s3_bucket" "this" {
-	count = var.create_gd_s3_bucket ? 1 : 0
+  count         = var.create_gd_s3_bucket ? 1 : 0
   provider      = aws.s3
   bucket        = var.bucket_name
   acl           = "private"
@@ -173,9 +175,9 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_guardduty_publishing_destination" "this" {
-  provider    = aws.gd
-  count       = var.create_gd_s3_bucket ? 1 : 0
-  detector_id = aws_guardduty_detector.this.id
+  provider        = aws.gd
+  count           = var.create_gd_s3_bucket ? 1 : 0
+  detector_id     = aws_guardduty_detector.this.id
   destination_arn = aws_s3_bucket.this[0].arn
-  kms_key_arn = module.cmk[0].arn
+  kms_key_arn     = module.cmk[0].arn
 }
