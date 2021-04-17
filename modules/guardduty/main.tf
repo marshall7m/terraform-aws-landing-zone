@@ -1,13 +1,11 @@
-data "aws_caller_identity" "gd" {
-  provider = aws.gd
-}
+data "aws_caller_identity" "gd" {}
 
-data "aws_caller_identity" "s3" {
-  provider = aws.s3
+data "aws_caller_identity" "logs" {
+  provider = aws.logs
 }
 
 data "aws_region" "s3" {
-  provider = aws.s3
+  provider = aws.logs
 }
 
 locals {
@@ -19,26 +17,23 @@ resource "random_uuid" "gd_bucket" {
 }
 
 resource "aws_guardduty_detector" "this" {
-  provider = aws.gd
   enable   = var.enable
 }
 
 resource "aws_guardduty_organization_configuration" "this" {
   count       = var.is_organization_gd ? 1 : 0
-  provider    = aws.gd
   auto_enable = true
   detector_id = aws_guardduty_detector.this.id
 }
 
 resource "aws_guardduty_organization_admin_account" "this" {
   count            = var.is_organization_gd != null ? 1 : 0
-  provider         = aws.gd
   admin_account_id = data.aws_caller_identity.gd.id
 }
 
 data "aws_iam_policy_document" "s3" {
   count    = var.create_gd_s3_bucket ? 1 : 0
-  provider = aws.s3
+  provider = aws.logs
   statement {
     sid = "GuardDutyWriteAccess"
     actions = [
@@ -134,7 +129,7 @@ data "aws_iam_policy_document" "s3" {
 module "cmk" {
   count = var.create_gd_s3_bucket ? 1 : 0
   providers = {
-    aws = aws.s3
+    aws = aws.logs
   }
   source                  = "github.com/marshall7m/terraform-aws-kms/modules//cmk"
   trusted_admin_arns      = var.trusted_iam_kms_admin_arns
@@ -164,7 +159,7 @@ module "cmk" {
 
 resource "aws_s3_bucket" "this" {
   count         = var.create_gd_s3_bucket ? 1 : 0
-  provider      = aws.s3
+  provider      = aws.logs
   bucket        = var.bucket_name
   acl           = "private"
   force_destroy = true
@@ -175,7 +170,6 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_guardduty_publishing_destination" "this" {
-  provider        = aws.gd
   count           = var.create_gd_s3_bucket ? 1 : 0
   detector_id     = aws_guardduty_detector.this.id
   destination_arn = aws_s3_bucket.this[0].arn
