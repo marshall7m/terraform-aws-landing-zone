@@ -32,7 +32,7 @@ variable "account_policies" {
 
 #### GUARDDUTY ####
 
-variable "enabled_gd" {
+variable "enable_gd" {
   description = "Determines if organization-level Guard Duty should be used"
   type        = bool
   default     = true

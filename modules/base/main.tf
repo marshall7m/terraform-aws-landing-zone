@@ -9,9 +9,9 @@ module "accounts" {
 }
 
 module "guardduty" {
-  count  = var.enable_gd ? 1 : 0
+  # count  = var.enable_gd ? 1 : 0
   source = "..//guardduty"
-
+  logs_org_role_arn          = module.accounts.logs_org_role_arn
   enable                       = var.gd_is_active
   is_organization_gd           = true
   create_gd_s3_bucket          = var.create_gd_s3_bucket
@@ -22,13 +22,9 @@ module "guardduty" {
 }
 
 module "cloudtrail" {
-  count  = var.enable_ct ? 1 : 0
+  # count  = var.enable_ct ? 1 : 0
   source = "..//cloudtrail"
 
-  # providers = {
-  # 		aws.ct = aws
-  # 		aws.logs = aws.logs
-  # }
   enable_logging             = var.ct_is_active
   logs_org_role_arn          = module.accounts.logs_org_role_arn
   is_organization_trail      = true
