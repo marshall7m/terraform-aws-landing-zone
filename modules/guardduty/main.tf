@@ -4,7 +4,7 @@ data "aws_caller_identity" "logs" {
   provider = aws.logs
 }
 
-data "aws_region" "s3" {
+data "aws_region" "logs" {
   provider = aws.logs
 }
 
@@ -144,7 +144,7 @@ module "cmk" {
       ]
 
       resources = [
-        "arn:aws:kms:${data.aws_region.s3.name}:${data.aws_caller_identity.s3.account_id}:key/*"
+        "arn:aws:kms:${data.aws_region.logs.name}:${data.aws_caller_identity.logs.account_id}:key/*"
       ]
 
       principals = [
