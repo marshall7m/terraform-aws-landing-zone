@@ -6,12 +6,17 @@ module "accounts" {
   create_organization = var.create_organization
   child_accounts      = var.child_accounts
   policies            = var.account_policies
+  aws_service_access_principals = [
+    "cloudtrail.amazonaws.com",
+    "config.amazonaws.com",
+    "guardduty.amazonaws.com"
+  ]
 }
 
 module "guardduty" {
-  # count  = var.enable_gd ? 1 : 0
-  source = "..//guardduty"
-  logs_org_role_arn          = module.accounts.logs_org_role_arn
+  source            = "..//guardduty"
+  logs_org_role_arn = module.accounts.logs_org_role_arn
+
   enable                       = var.gd_is_active
   is_organization_gd           = true
   create_gd_s3_bucket          = var.create_gd_s3_bucket
@@ -22,16 +27,23 @@ module "guardduty" {
 }
 
 module "cloudtrail" {
-  # count  = var.enable_ct ? 1 : 0
-  source = "..//cloudtrail"
+  source            = "..//cloudtrail"
+  logs_org_role_arn = module.accounts.logs_org_role_arn
 
   enable_logging             = var.ct_is_active
-  logs_org_role_arn          = module.accounts.logs_org_role_arn
   is_organization_trail      = true
   name                       = var.ct_name
   log_retention_days         = var.ct_log_retention_days
   trusted_iam_kms_admin_arns = ["arn:aws:iam::${data.aws_caller_identity.master.id}:root"]
 }
 
+module "config" {
+  source            = "..//config"
+  logs_org_role_arn = module.accounts.logs_org_role_arn
 
-
+  enable                     = var.cfg_is_active
+  is_organization_cfg        = true
+  name                       = var.cfg_is_active
+  log_retention_days         = var.cfg_log_retention_days
+  trusted_iam_kms_admin_arns = ["arn:aws:iam::${data.aws_caller_identity.master.id}:root"]
+}

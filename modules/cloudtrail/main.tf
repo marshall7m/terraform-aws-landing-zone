@@ -189,7 +189,18 @@ resource "aws_s3_bucket" "this" {
 
 data "aws_iam_policy_document" "ct_bucket" {
   provider = aws.logs
-
+  #TODO: figure out if needed for tf caller after inital tf apply for future use of module
+  # statement {
+  #   sid = "TerraformCallerAccess"
+  #   principals {
+  #     type = "AWS"
+  #     identifiers = [data.aws_caller_identity.logs.id]
+  #   }
+  #   actions = [
+  #     "s3:GetObject",
+  #     "s3:GetBucketLocation"
+  #   ]
+  # }
   statement {
     sid = "CloudTrailAclCheckAccess"
     principals {

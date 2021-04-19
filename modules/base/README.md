@@ -24,7 +24,7 @@
 | ct\_log\_retention\_days | Number of days Cloud Watch will retain the logs | `number` | n/a | yes |
 | ct\_name | Name of CloudTrail | `string` | n/a | yes |
 | enable\_ct | Determines if organization-level Cloudtrail should be used | `bool` | `true` | no |
-| enabled\_gd | Determines if organization-level Guard Duty should be used | `bool` | `true` | no |
+| enable\_gd | Determines if organization-level Guard Duty should be used | `bool` | `true` | no |
 | gd\_bucket\_name | S3 bucket to publish Guard Duty findings to | `string` | `null` | no |
 | gd\_deny\_invalid\_crypted\_headers | Determines if a S3 policy statement should be added to Guard duty associated bucket to deny uploads with invalid crypted headers | `bool` | `true` | no |
 | gd\_deny\_uncrypted\_uploads | Determines if a S3 policy statement should be added to Guard duty associated bucket to deny uncrypted uploads | `bool` | `true` | no |
@@ -32,4 +32,6 @@
 
 ## Outputs
 
-No output.
+| Name | Description |
+|------|-------------|
+| logs\_role\_arn | n/a |

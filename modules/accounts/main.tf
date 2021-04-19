@@ -31,12 +31,13 @@ resource "aws_organizations_policy_attachment" "this" {
 }
 
 resource "aws_organizations_account" "this" {
-  for_each                   = { for account in local.child_accounts : account.name => account }
-  name                       = each.value.name
-  parent_id                  = each.value.parent_id
-  email                      = each.value.email
-  role_name                  = each.value.role_name
-  iam_user_access_to_billing = each.value.iam_user_access_to_billing ? "ALLOW" : "DENY"
+  for_each  = { for account in local.child_accounts : account.name => account }
+  name      = each.value.name
+  parent_id = each.value.parent_id
+  email     = each.value.email
+  role_name = each.value.role_name
+  # iam_user_access_to_billing = each.value.iam_user_access_to_billing ? "ALLOW" : "DENY"
+  iam_user_access_to_billing = null
   tags                       = each.value.tags
 
   # There is no AWS Organizations API for reading role_name
