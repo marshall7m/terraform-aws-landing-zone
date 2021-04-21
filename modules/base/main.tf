@@ -37,13 +37,21 @@ module "cloudtrail" {
   trusted_iam_kms_admin_arns = ["arn:aws:iam::${data.aws_caller_identity.master.id}:root"]
 }
 
-module "config" {
-  source            = "..//config"
-  logs_org_role_arn = module.accounts.logs_org_role_arn
+#TODO: Remove generated config module and pass provider via for_each when issue is resolved: https://github.com/hashicorp/terraform/issues/24476
+resource "local_file" "per_account_generated" {
+  content = templatefile("generate_config_module.tpl", {
+    logs_org_role_arn = module.accounts.logs_org_role_arn
+    accounts = module.accounts.child_accounts
+    trusted_iam_kms_admin_arns = "arn:aws:iam::${data.aws_caller_identity.master.id}:root"
+  })
+  filename = "generate_config_module.tf"
+}
 
-  enable                     = var.cfg_is_active
-  is_organization_cfg        = true
-  name                       = var.cfg_is_active
-  log_retention_days         = var.cfg_log_retention_days
-  trusted_iam_kms_admin_arns = ["arn:aws:iam::${data.aws_caller_identity.master.id}:root"]
+resource "null_resource" "this" {
+  provisioner "local-exec" {
+    command = "terraform init"
+  }
+  depends_on = [
+    local_file.per_account_generated
+  ]
 }
