@@ -40,8 +40,9 @@ module "cloudtrail" {
 #TODO: Remove generated config module and pass provider via for_each when issue is resolved: https://github.com/hashicorp/terraform/issues/24476
 resource "local_file" "per_account_generated" {
   content = templatefile("generate_config_module.tpl", {
-    logs_org_role_arn = module.accounts.logs_org_role_arn
-    accounts = module.accounts.child_accounts
+    logs_org_role_arn          = module.accounts.logs_org_role_arn
+    accounts                   = module.accounts.child_accounts
+    cfg_is_active              = local.child_accounts.cfg_is_active
     trusted_iam_kms_admin_arns = "arn:aws:iam::${data.aws_caller_identity.master.id}:root"
   })
   filename = "generate_config_module.tf"

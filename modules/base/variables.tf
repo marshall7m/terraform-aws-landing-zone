@@ -17,6 +17,7 @@ variable "child_accounts" {
     tags                       = optional(map(string))
     is_logs                    = optional(bool)
     iam_user_access_to_billing = optional(bool)
+    cfg_active                 = optional(bool)
   }))
   default = []
 }
