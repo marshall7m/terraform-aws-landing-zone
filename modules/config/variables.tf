@@ -1,3 +1,9 @@
+variable "logs_arn" {
+  description = "ARN of the account to create the AWS S3 bucket and KMS CMK. If not specified, defaults to primary provider."
+  type        = string
+  default     = null
+}
+
 variable "enable_cfg_recorder" {
   description = "Determines if the AWS Config recorder is active for the account"
   type        = bool
@@ -13,7 +19,7 @@ variable "include_global_resource_types" {
 variable "cfg_name" {
   description = "Name of AWS Config"
   type        = string
-  default     = null
+  default     = "account-config"
 }
 
 variable "cfg_logs_bucket" {
@@ -52,4 +58,22 @@ variable "rules" {
     tags                        = optional(map(string))
   }))
   default = []
+}
+
+variable "bucket_key_prefix" {
+  description = "Prefix for AWS S3 bucket used to store AWS Config logs"
+  type        = string
+  default     = null
+}
+
+variable "bucket_name" {
+  description = "AWS S3 bucket used to store AWS Config logs"
+  type        = string
+  default     = null
+}
+
+variable "cmk_trusted_admin_arns" {
+  description = "Trusted ARNs that will have administrative permissions for AWS KMS CMK"
+  type        = list(string)
+  default     = []
 }

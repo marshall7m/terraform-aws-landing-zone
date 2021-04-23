@@ -12,3 +12,10 @@ terraform {
     }
   }
 }
+
+provider "aws" {
+  assume_role {
+    role_arn = var.logs_arn
+  }
+  alias = "logs"
+}

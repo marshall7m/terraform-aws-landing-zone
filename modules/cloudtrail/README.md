@@ -27,7 +27,7 @@
 | is\_organization\_trail | Determines if module should create an organization CloudTrail <br>Prereqs:<br>  - AWS Organization must already exists<br>  - Terraform AWS provider must be configured with organization master account | `bool` | `false` | no |
 | key\_prefix | S3 key prefix to put Cloud Trail logs under | `string` | `null` | no |
 | log\_retention\_days | Number of days Cloud Watch will retain the logs | `number` | n/a | yes |
-| logs\_org\_role\_arn | n/a | `string` | n/a | yes |
+| logs\_arn | ARN of the account to create the AWS S3 bucket and KMS CMK. If not specified, defaults to primary provider. | `string` | `null` | no |
 | name | Name of CloudTrail | `string` | n/a | yes |
 | trusted\_iam\_kms\_admin\_arns | ARNs of IAM entities that will have administrative access to CMK key associated with Cloud Trail | `list(string)` | n/a | yes |
 | trusted\_iam\_kms\_decrypt\_arns | ARNs of IAM entities that will have the ability to only decrypt the CMK key via it's associated AWS account's CloudTrail | `list(string)` | `[]` | no |

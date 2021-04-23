@@ -9,21 +9,15 @@ data "aws_caller_identity" "logs" {
   provider = aws.logs
 }
 
-data "aws_region" "ct" {
-  #provider = aws.ct
-}
+data "aws_region" "ct" {}
 
-data "aws_caller_identity" "ct" {
-  #provider = aws.ct
-}
+data "aws_caller_identity" "ct" {}
 
 data "aws_organizations_organization" "this" {
   count = var.is_organization_trail ? 1 : 0
-  #provider = aws.ct
 }
 
 resource "aws_cloudtrail" "this" {
-  #provider                      = aws.ct
   enable_logging                = var.enable_logging
   name                          = var.name
   s3_bucket_name                = aws_s3_bucket.this.id
@@ -43,9 +37,6 @@ resource "aws_cloudtrail" "this" {
 }
 
 module "ct_role" {
-  # providers = {
-  #   aws = aws.ct
-  # }
   source           = "github.com/marshall7m/terraform-aws-iam/modules//iam-role"
   role_name        = var.name
   trusted_services = ["cloudtrail.amazonaws.com"]
@@ -251,20 +242,17 @@ data "aws_iam_policy_document" "ct_bucket" {
 }
 
 resource "aws_cloudwatch_log_group" "this" {
-  #provider          = aws.ct
   name              = var.cw_log_group_name
   retention_in_days = var.log_retention_days
   kms_key_id        = module.cmk.arn
 }
 
 resource "aws_iam_policy" "ct" {
-  #provider = aws.ct
   name   = var.name
   policy = data.aws_iam_policy_document.ct.json
 }
 
 data "aws_iam_policy_document" "ct" {
-  #provider = aws.ct
 
   statement {
     sid = "CloudTrailCreateStreamAccess"

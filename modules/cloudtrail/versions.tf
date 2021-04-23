@@ -5,10 +5,6 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 2.42"
-      # configuration_aliases = [
-      #   aws.ct,
-      #   aws.logs
-      # ]
     }
     random = {
       source  = "hashicorp/random"
@@ -17,13 +13,9 @@ terraform {
   }
 }
 
-variable "logs_org_role_arn" {
-  type = string
-}
-
 provider "aws" {
   assume_role {
-    role_arn = var.logs_org_role_arn
+    role_arn = var.logs_arn
   }
   alias = "logs"
 }
