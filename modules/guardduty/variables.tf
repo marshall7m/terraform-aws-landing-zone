@@ -1,3 +1,9 @@
+variable "logs_arn" {
+  description = "ARN of the account to create the AWS S3 bucket and KMS CMK. If not specified, defaults to primary provider."
+  type        = string
+  default     = null
+}
+
 variable "enable" {
   description = "Determines if AWS Guard Duty should be active. (Suspends existing Guard Duty monitoring if set to false)"
   type        = bool

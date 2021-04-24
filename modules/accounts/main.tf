@@ -9,7 +9,6 @@ locals {
   #sets product for account and each associated policy
   account_policies = chunklist(flatten([for account in var.child_accounts : try(setproduct([account.name], account.policies), [])]), 2)
   child_accounts = [for account in var.child_accounts : defaults(account, {
-    is_logs                    = false
     role_name                  = "OrganizationAccountAccessRole"
     iam_user_access_to_billing = false
   })]

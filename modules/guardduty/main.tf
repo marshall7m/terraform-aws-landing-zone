@@ -34,6 +34,7 @@ resource "aws_guardduty_organization_admin_account" "this" {
 data "aws_iam_policy_document" "s3" {
   count    = var.create_gd_s3_bucket ? 1 : 0
   provider = aws.logs
+  
   statement {
     sid = "GuardDutyWriteAccess"
     actions = [
@@ -169,7 +170,6 @@ resource "aws_s3_bucket" "this" {
 
 resource "aws_guardduty_publishing_destination" "this" {
   count    = var.create_gd_s3_bucket ? 1 : 0
-  provider = aws.logs
 
   detector_id     = aws_guardduty_detector.this.id
   destination_arn = aws_s3_bucket.this[0].arn

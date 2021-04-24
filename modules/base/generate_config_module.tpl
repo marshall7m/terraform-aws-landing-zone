@@ -1,8 +1,18 @@
 %{ for account in accounts ~}
+
+provider "aws" {
+  assume_role {
+    role_arn = "${account.role_arn}"
+  }
+  alias = "${account.name}"
+}
+
 module "${account.name}_config" {
-  source = "..//config"
-  logs_org_role_arn = "${logs_org_role_arn}"
-  provider_role_arn = "${account.role_arn}"
+  source = "..//account-config"
+  logs_arn = "${logs_arn}"
+  providers = {
+    aws = aws.${account.name}
+  }
   enable_cfg_recorder        = "${cfg_is_active}"
 }
 

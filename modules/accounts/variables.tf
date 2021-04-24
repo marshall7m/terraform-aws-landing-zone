@@ -13,7 +13,6 @@ variable "child_accounts" {
     parent_id                  = optional(string)
     policies                   = optional(list(string))
     tags                       = optional(map(string))
-    is_logs                    = optional(bool)
     iam_user_access_to_billing = optional(bool)
   }))
   default = []

@@ -36,6 +36,7 @@ resource "aws_config_delivery_channel" "this" {
   name           = var.cfg_name
   s3_bucket_name = local.bucket_name
   s3_key_prefix  = local.bucket_key_prefix
+  #TODO: add SNS
   # sns_topic_arn  = var.cfg_sns_topic_arn
 
   snapshot_delivery_properties {

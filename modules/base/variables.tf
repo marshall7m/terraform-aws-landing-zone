@@ -16,8 +16,8 @@ variable "child_accounts" {
     policies                   = optional(list(string))
     tags                       = optional(map(string))
     is_logs                    = optional(bool)
+    is_cfg = optional(bool)
     iam_user_access_to_billing = optional(bool)
-    cfg_active                 = optional(bool)
   }))
   default = []
 }
@@ -91,4 +91,51 @@ variable "ct_log_retention_days" {
 variable "ct_name" {
   description = "Name of CloudTrail"
   type        = string
+}
+
+#### CONFIG ####
+
+variable "cfg_is_active" {
+  description = "Determines if AWS Config recorder is active in each child account within organization"
+  type = bool
+  default = true
+}
+
+variable "org_managed_rules" {
+  description = "List of custom or AWS managed rules to apply to provider's account"
+  type = list(object({
+    name                        = string
+    description                 = optional(string)
+    excluded_accounts = optional(list(string))
+    input_parameters            = optional(string)
+    source                      = string
+    rule_identifier           = string
+    maximum_execution_frequency = optional(string)
+    tags                        = optional(map(string))
+  }))
+  default = []
+}
+
+variable "org_custom_rules" {
+  description = "List of custom or AWS managed rules to apply to provider's account"
+  type = list(object({
+    name                        = string
+    description                 = optional(string)
+    excluded_accounts = optional(list(string))
+    input_parameters            = optional(string)
+    source                      = string
+    rule_identifier           = string
+    maximum_execution_frequency = optional(string)
+    tags                        = optional(map(string))
+
+    function_name = optional(string)
+    handler = string
+    runtime = string
+    env_vars = optional(map(string))
+    filename = optional(string)
+    image_uri = optional(string)
+    s3_bucket = optional(string)
+    s3_key = optional(string)
+  }))
+  default = []
 }

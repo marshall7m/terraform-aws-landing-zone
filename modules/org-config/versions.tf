@@ -6,16 +6,11 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 2.42"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.1.0"
-    }
   }
 }
 
 provider "aws" {
   assume_role {
-    role_arn = var.logs_arn
+    role_arn = var.cfg_role_arn
   }
-  alias = "logs"
 }
