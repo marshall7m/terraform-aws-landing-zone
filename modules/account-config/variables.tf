@@ -4,7 +4,7 @@ variable "logs_arn" {
   default     = null
 }
 
-variable "enable_cfg_recorder" {
+variable "enable_recorder" {
   description = "Determines if the AWS Config recorder is active for the account"
   type        = bool
   default     = true
@@ -16,25 +16,13 @@ variable "include_global_resource_types" {
   default     = true
 }
 
-variable "cfg_name" {
+variable "name" {
   description = "Name of AWS Config"
   type        = string
   default     = "account-config"
 }
 
-variable "cfg_logs_bucket" {
-  description = "Name of AWS S3 bucket used to store AWS config logs"
-  type        = string
-  default     = null
-}
-
-variable "cfg_logs_prefix" {
-  description = "Prefix to store logs under within S3 bucket"
-  type        = string
-  default     = null
-}
-
-variable "cfg_delivery_frequency" {
+variable "delivery_frequency" {
   description = "Frequency for AWS Config to deliver configuration snapshots"
   type        = string
   default     = "Six_Hours"

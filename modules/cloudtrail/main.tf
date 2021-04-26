@@ -140,7 +140,7 @@ module "cmk" {
       ]
     }],
     length(var.trusted_iam_kms_decrypt_arns) > 0 ? [{
-      sid    = "CloudTrailDecryptionAccess"
+      sid    = "CloudTrailUserDecryptionAccess"
       effect = "Allow"
       principals = [
         {

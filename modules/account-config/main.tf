@@ -1,7 +1,7 @@
 data "aws_caller_identity" "cfg" {}
 
 locals {
-  bucket_name       = coalesce(var.bucket_name, lower("config-logs-${random_uuid.cfg_bucket.id}"))
+  bucket_name       = coalesce(var.bucket_name, lower("config-logs-${random_uuid.bucket.id}"))
   bucket_key_prefix = var.bucket_key_prefix != null ? "${var.bucket_key_prefix}/" : ""
 }
 
@@ -23,24 +23,24 @@ resource "aws_config_config_rule" "this" {
 }
 
 resource "aws_config_configuration_recorder_status" "this" {
-  count = var.enable_cfg_recorder ? 1 : 0
+  count = var.enable_recorder ? 1 : 0
 
-  name       = var.cfg_name
+  name       = var.name
   is_enabled = true
   depends_on = [aws_config_delivery_channel.this]
 }
 
 resource "aws_config_delivery_channel" "this" {
-  count = var.enable_cfg_recorder ? 1 : 0
+  count = var.enable_recorder ? 1 : 0
 
-  name           = var.cfg_name
+  name           = var.name
   s3_bucket_name = local.bucket_name
   s3_key_prefix  = local.bucket_key_prefix
   #TODO: add SNS
   # sns_topic_arn  = var.cfg_sns_topic_arn
 
   snapshot_delivery_properties {
-    delivery_frequency = var.cfg_delivery_frequency
+    delivery_frequency = var.delivery_frequency
   }
 
   depends_on = [aws_config_configuration_recorder.this]
@@ -51,9 +51,9 @@ resource "aws_iam_service_linked_role" "config" {
 }
 
 resource "aws_config_configuration_recorder" "this" {
-  count = var.enable_cfg_recorder ? 1 : 0
+  count = var.enable_recorder ? 1 : 0
 
-  name     = var.cfg_name
+  name     = var.name
   role_arn = aws_iam_service_linked_role.config.arn
 
   recording_group {
@@ -62,7 +62,7 @@ resource "aws_config_configuration_recorder" "this" {
   }
 }
 
-resource "random_uuid" "cfg_bucket" {}
+resource "random_uuid" "bucket" {}
 
 resource "aws_s3_bucket" "this" {
   provider      = aws.logs
@@ -72,10 +72,10 @@ resource "aws_s3_bucket" "this" {
     enabled = true
   }
 
-  policy = data.aws_iam_policy_document.cfg_bucket.json
+  policy = data.aws_iam_policy_document.bucket.json
 }
 
-data "aws_iam_policy_document" "cfg_bucket" {
+data "aws_iam_policy_document" "bucket" {
   provider = aws.logs
 
   statement {

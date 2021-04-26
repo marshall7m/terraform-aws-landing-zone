@@ -3,16 +3,21 @@ data "aws_caller_identity" "master" {}
 locals {
   child_accounts = [for account in var.child_accounts : defaults(account, {
     is_logs = false
-    is_cfg = false
+    is_cfg  = false
   })]
   logs_org_role_arn = one([for account in local.child_accounts :
-  "arn:aws:iam::${module.accounts.child_accounts[account.name].id}:role/${account.role_name}" if account.is_logs])
+  module.accounts.child_accounts[account.name].role_arn if account.is_logs])
   cfg_org_role_arn = one([for account in local.child_accounts :
-  "arn:aws:iam::${module.accounts.child_accounts[account.name].id}:role/${account.role_name}" if account.is_cfg])
+  module.accounts.child_accounts[account.name].role_arn if account.is_cfg])
+  cfg_managed_rules = [for rule in var.cfg_managed_rules : defaults(rule, {
+    exclude_root = false
+  })]
+  cfg_custom_rules = [for rule in var.cfg_custom_rules : defaults(rule, {
+    exclude_root = false
+  })]
 }
 
 data "aws_arn" "cfg_org_role_arn" {
-  count = local.cfg_org_role_arn != null ? 1 : 0
   arn = local.cfg_org_role_arn
 }
 
@@ -31,7 +36,7 @@ module "accounts" {
 }
 
 module "guardduty" {
-  source            = "..//guardduty"
+  source   = "..//guardduty"
   logs_arn = local.logs_org_role_arn
 
   enable                       = var.gd_is_active
@@ -44,7 +49,7 @@ module "guardduty" {
 }
 
 module "cloudtrail" {
-  source            = "..//cloudtrail"
+  source   = "..//cloudtrail"
   logs_arn = local.logs_org_role_arn
 
   enable_logging             = var.ct_is_active
@@ -54,38 +59,57 @@ module "cloudtrail" {
   trusted_iam_kms_admin_arns = ["arn:aws:iam::${data.aws_caller_identity.master.id}:root"]
 }
 
-#TODO: Remove generated config module and pass provider via for_each when issue is resolved: https://github.com/hashicorp/terraform/issues/24476
-resource "local_file" "per_account_generated" {
-  content = templatefile("generate_config_module.tpl", {
-    logs_arn          = local.logs_org_role_arn
-    accounts                   = module.accounts.child_accounts
-    cfg_is_active = var.cfg_is_active
-  })
-  filename = "generate_config_module.tf"
+/* TODO: Create `list delegated admin` null_resource to get current delegated admin services
+and use for conditionally triggering daisy chain null_resource register
+*/
+
+#TODO: `Add aws_organizations_delegated_adminstrator` when resource is added: https://github.com/hashicorp/terraform-provider-aws/issues/14932
+resource "null_resource" "cfg_admin_cfg_principal" {
+  count = local.cfg_org_role_arn != null ? 1 : 0
+  provisioner "local-exec" {
+    command = "aws organizations register-delegated-administrator --service-principal=config.amazonaws.com --account-id=${data.aws_arn.cfg_org_role_arn.account}"
+  }
 }
 
-resource "null_resource" "tf_init_generated_modules" {
+resource "null_resource" "cfg_admin_multi_account_cfg_principal" {
+  count = local.cfg_org_role_arn != null ? 1 : 0
   provisioner "local-exec" {
-    command = "terraform init"
+    command = "aws organizations register-delegated-administrator --service-principal=config-multiaccountsetup.amazonaws.com --account-id=${data.aws_arn.cfg_org_role_arn.account}"
   }
   depends_on = [
-    local_file.per_account_generated
+    null_resource.cfg_admin_cfg_principal
   ]
 }
 
-#TODO: `Add aws_organizations_delegated_adminstrator` when resource is added: https://github.com/hashicorp/terraform-provider-aws/issues/14932
-
-resource "null_resource" "delegated_org_admin" {
+resource "null_resource" "cfg_admin_gd_principal" {
   count = local.cfg_org_role_arn != null ? 1 : 0
-	provisioner "local-exec" {
-    command = "aws organizations register-delegated-administrator --service-principal=config-multiaccountsetup.amazonaws.com --account-id=${data.aws_arn.cfg_org_role_arn[0].id}"
-	}
+  provisioner "local-exec" {
+    command = "aws organizations register-delegated-administrator --service-principal=guardduty.amazonaws.com --account-id=${data.aws_arn.cfg_org_role_arn.account}"
+  }
+  depends_on = [
+    null_resource.cfg_admin_multi_account_cfg_principal
+  ]
 }
 
 module "org_cfg" {
   source = "..//org-config"
-  cfg_role_arn = data.aws_arn.cfg_org_role_arn[0].arn
+  providers = {
+    aws.master = aws
+  }
 
-  managed_rules = var.org_managed_rules
-  custom_rules = var.org_custom_rules
+  logs_role_arn = local.logs_org_role_arn
+  cfg_role_arn  = local.cfg_org_role_arn
+
+  managed_rules = [for rule in local.cfg_managed_rules :
+    merge(rule, {
+      excluded_accounts = concat(rule.exclude_root ? [data.aws_caller_identity.master.id] : [], [for name in rule.excluded_accounts : module.accounts.child_accounts[name].id])
+      included_accounts = [for name in rule.included_accounts : module.accounts.child_accounts[name].id]
+    })
+  ]
+  custom_rules = [for rule in local.cfg_custom_rules :
+    merge(rule, {
+      excluded_accounts = concat(rule.exclude_root ? [data.aws_caller_identity.master.id] : [], [for name in rule.excluded_accounts : module.accounts.child_accounts[name].id])
+      included_accounts = [for name in rule.included_accounts : module.accounts.child_accounts[name].id]
+    })
+  ]
 }
