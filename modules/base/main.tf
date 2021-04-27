@@ -15,6 +15,11 @@ locals {
   cfg_custom_rules = [for rule in var.cfg_custom_rules : defaults(rule, {
     exclude_root = false
   })]
+  cfg_admin_service_principals = [
+    "config.amazonaws.com",
+    "config-multiaccountsetup.amazonaws.com",
+    "guardduty.amazonaws.com"
+  ]
 }
 
 data "aws_arn" "cfg_org_role_arn" {
@@ -59,36 +64,17 @@ module "cloudtrail" {
   trusted_iam_kms_admin_arns = ["arn:aws:iam::${data.aws_caller_identity.master.id}:root"]
 }
 
-/* TODO: Create `list delegated admin` null_resource to get current delegated admin services
-and use for conditionally triggering daisy chain null_resource register
-*/
 
 #TODO: `Add aws_organizations_delegated_adminstrator` when resource is added: https://github.com/hashicorp/terraform-provider-aws/issues/14932
-resource "null_resource" "cfg_admin_cfg_principal" {
-  count = local.cfg_org_role_arn != null ? 1 : 0
+resource "null_resource" "delegate_cfg_admin" {
+  for_each = { for principal in local.cfg_admin_service_principals: split(".", principal)[0] => principal}
   provisioner "local-exec" {
-    command = "aws organizations register-delegated-administrator --service-principal=config.amazonaws.com --account-id=${data.aws_arn.cfg_org_role_arn.account}"
+    command = templatefile("files/delegate_admin.sh", {
+      master_account_role_arn = data.aws_caller_identity.master.arn
+      account_id = data.aws_arn.cfg_org_role_arn.account
+      principal = each.value
+    })
   }
-}
-
-resource "null_resource" "cfg_admin_multi_account_cfg_principal" {
-  count = local.cfg_org_role_arn != null ? 1 : 0
-  provisioner "local-exec" {
-    command = "aws organizations register-delegated-administrator --service-principal=config-multiaccountsetup.amazonaws.com --account-id=${data.aws_arn.cfg_org_role_arn.account}"
-  }
-  depends_on = [
-    null_resource.cfg_admin_cfg_principal
-  ]
-}
-
-resource "null_resource" "cfg_admin_gd_principal" {
-  count = local.cfg_org_role_arn != null ? 1 : 0
-  provisioner "local-exec" {
-    command = "aws organizations register-delegated-administrator --service-principal=guardduty.amazonaws.com --account-id=${data.aws_arn.cfg_org_role_arn.account}"
-  }
-  depends_on = [
-    null_resource.cfg_admin_multi_account_cfg_principal
-  ]
 }
 
 module "org_cfg" {
