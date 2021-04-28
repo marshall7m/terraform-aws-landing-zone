@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "bucket" {
       identifiers = ["config.amazonaws.com"]
     }
     actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${local.bucket_name}/${local.bucket_key_prefix}AWSLogs/${data.aws_caller_identity.logs.id}/Config/*"]
+    resources = ["arn:aws:s3:::${local.bucket_name}/${local.bucket_key_prefix}AWSLogs/${data.aws_caller_identity.cfg.id}/Config/*"]
     condition {
       test     = "StringEquals"
       variable = "s3:x-amz-acl"

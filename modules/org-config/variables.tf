@@ -65,7 +65,7 @@ variable "cmk_trusted_admin_arns" {
 }
 
 variable "managed_rules" {
-  description = "List of custom or AWS managed rules to apply to provider's account"
+  description = "List of custom or AWS managed rules to apply to specified organization accounts"
   type = list(object({
     name                        = string
     description                 = optional(string)
@@ -80,7 +80,7 @@ variable "managed_rules" {
 }
 
 variable "custom_rules" {
-  description = "List of custom or AWS managed rules to apply to provider's account"
+  description = "List of custom or AWS managed rules to apply to specified organization accounts"
   type = list(object({
     name                        = string
     description                 = optional(string)
@@ -99,6 +99,20 @@ variable "custom_rules" {
     image_uri     = optional(string)
     s3_bucket     = optional(string)
     s3_key        = optional(string)
+  }))
+  default = []
+}
+
+variable "conformance_packs" {
+  description = "List of conformance packs to apply to AWS Organization accounts"
+  type = list(object({
+    name = string
+    inputs_parameters = optional(list(object({
+      name = string
+      value = string
+    })))
+    template_body = optional(string)
+    template_s3_uri = optional(string)
   }))
   default = []
 }

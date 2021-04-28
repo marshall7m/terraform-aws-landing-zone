@@ -43,3 +43,31 @@ module "lambda" {
   s3_key    = each.value.s3_key
 }
 
+resource "aws_config_conformance_pack" "this" {
+  for_each = { for pack in var.conformance_packs: pack.name => pack }
+  name = each.value.name
+
+  dynamic "input_parameter" {
+    for_each = { for param in each.value.input_parameters: param.name => param}
+    content {
+      parameter_name  = input_parameter.value.name
+      parameter_value = input_parameter.value.value
+    }
+  }
+
+  template_body = each.value.template_body
+
+  depends_on = [aws_config_configuration_recorder.this]
+}
+
+#### DEFAULT RULES ####
+/*
+- GUARDDUTY_ENABLED_CENTRALIZED
+  - CentralMonitoringAccount
+- CLOUD_TRAIL_ENABLED
+  - s3BucketName
+  - snsTopicArn
+  - cloudWatchLogsLogGroupArn
+- CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED
+- ACCOUNT_PART_OF_ORGANIZATIONS
+*/

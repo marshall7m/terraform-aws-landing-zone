@@ -15,11 +15,6 @@ locals {
   cfg_custom_rules = [for rule in var.cfg_custom_rules : defaults(rule, {
     exclude_root = false
   })]
-  cfg_admin_service_principals = [
-    "config.amazonaws.com",
-    "config-multiaccountsetup.amazonaws.com",
-    "guardduty.amazonaws.com"
-  ]
 }
 
 data "aws_arn" "cfg_org_role_arn" {
@@ -66,15 +61,54 @@ module "cloudtrail" {
 
 
 #TODO: `Add aws_organizations_delegated_adminstrator` when resource is added: https://github.com/hashicorp/terraform-provider-aws/issues/14932
-resource "null_resource" "delegate_cfg_admin" {
-  for_each = { for principal in local.cfg_admin_service_principals: split(".", principal)[0] => principal}
+resource "null_resource" "delegate_config" {
   provisioner "local-exec" {
     command = templatefile("files/delegate_admin.sh", {
-      master_account_role_arn = data.aws_caller_identity.master.arn
+      master_account_role_arn = split("/", data.aws_caller_identity.master.arn)[0] == "user" ? null : data.aws_caller_identity.master.arn
       account_id = data.aws_arn.cfg_org_role_arn.account
-      principal = each.value
+      principal = "config.amazonaws.com"
     })
   }
+}
+
+resource "null_resource" "delegate_config_multiaccountsetup" {
+  provisioner "local-exec" {
+    command = templatefile("files/delegate_admin.sh", {
+      master_account_role_arn = split("/", data.aws_caller_identity.master.arn)[0] == "user" ? null : data.aws_caller_identity.master.arn
+      account_id = data.aws_arn.cfg_org_role_arn.account
+      principal = "config-multiaccountsetup.amazonaws.com"
+    })
+  }
+  depends_on = [
+    null_resource.delegate_config
+  ]
+}
+
+resource "null_resource" "delegate_guardduty" {
+  provisioner "local-exec" {
+    command = templatefile("files/delegate_admin.sh", {
+      master_account_role_arn = split("/", data.aws_caller_identity.master.arn)[0] == "user" ? null : data.aws_caller_identity.master.arn
+      account_id = data.aws_arn.cfg_org_role_arn.account
+      principal = "guardduty.amazonaws.com"
+    })
+  }
+  depends_on = [
+    null_resource.delegate_config_multiaccountsetup
+  ]
+}
+
+locals {
+  ct_enabled_rule = var.ct_enabled_rule.enable ? {
+    rule_identifier = "CLOUD_TRAIL_ENABLED"
+    input_parameter = {
+      s3BucketName = module.ct.bucket_name
+      # snsTopicArn = ""
+      cloudWatchLogsLogGroupArn = module.ct.log_group_arn
+    }
+  } : null
+  default_managed_rules = [
+    local.ct_enabled_rule
+  ]
 }
 
 module "org_cfg" {
