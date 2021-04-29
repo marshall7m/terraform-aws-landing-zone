@@ -59,15 +59,3 @@ resource "aws_config_conformance_pack" "this" {
 
   depends_on = [aws_config_configuration_recorder.this]
 }
-
-#### DEFAULT RULES ####
-/*
-- GUARDDUTY_ENABLED_CENTRALIZED
-  - CentralMonitoringAccount
-- CLOUD_TRAIL_ENABLED
-  - s3BucketName
-  - snsTopicArn
-  - cloudWatchLogsLogGroupArn
-- CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED
-- ACCOUNT_PART_OF_ORGANIZATIONS
-*/

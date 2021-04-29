@@ -15,6 +15,65 @@ locals {
   cfg_custom_rules = [for rule in var.cfg_custom_rules : defaults(rule, {
     exclude_root = false
   })]
+  default_managed_rules = [
+    merge(
+      {
+        description = "Checks if CloudTrail is enabled within each member AWS account"
+        rule_identifier = "CLOUD_TRAIL_ENABLED"
+        input_parameters = {
+          s3BucketName = module.cloudtrail.s3_bucket_name
+          #TODO: Add sns for ct
+          # snsTopicArn = ""
+          cloudWatchLogsLogGroupArn = module.cloudtrail.cw_log_group_arn
+        }
+      }, 
+      defaults(var.ct_enabled_rule, {
+        enable = true
+        name = "cloudtrail-enabled"
+        exclude_root = true
+      })
+    ),
+    merge(
+      {
+        description = "Checks if GuardDuty is enabled within config AWS account"
+        rule_identifier = "GUARDDUTY_ENABLED_CENTRALIZED"
+        description = ""
+        input_parameters = {
+          CentralMonitoringAccount = data.aws_arn.cfg_org_role_arn.account
+        }
+      },
+      defaults(var.gd_enabled_centralized_rule, {
+        enable = true
+        name = "guardduty-enabled"
+        exclude_root = true
+      })
+    ),
+    merge(
+      {
+        description = "Checks if CloudTrail CloudWatch logs are enabled within AWS Organization CloudTrail's"
+        rule_identifier = "CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"
+      },
+      defaults(var.ct_cw_logs_enabled_rule, {
+        enable = true
+        name = "cloudtrail-cloudwatch-log-group-enabled"
+        exclude_root = true
+      })
+    ),
+    merge(
+      {
+        rule_identifier = "ACCOUNT_PART_OF_ORGANIZATIONS"
+        description = "Checks if member AWS account's organization master account ID is valid"
+        input_parameters = {
+          MasterAccountId = data.aws_caller_identity.master.id
+        }
+      },
+      defaults(var.account_part_of_org_rule, {
+        enable = true
+        name = "account-part-of-organization"
+        exclude_root = true
+      })
+    )
+  ]
 }
 
 data "aws_arn" "cfg_org_role_arn" {
@@ -97,20 +156,6 @@ resource "null_resource" "delegate_guardduty" {
   ]
 }
 
-locals {
-  ct_enabled_rule = var.ct_enabled_rule.enable ? {
-    rule_identifier = "CLOUD_TRAIL_ENABLED"
-    input_parameter = {
-      s3BucketName = module.ct.bucket_name
-      # snsTopicArn = ""
-      cloudWatchLogsLogGroupArn = module.ct.log_group_arn
-    }
-  } : null
-  default_managed_rules = [
-    local.ct_enabled_rule
-  ]
-}
-
 module "org_cfg" {
   source = "..//org-config"
   providers = {
@@ -120,7 +165,8 @@ module "org_cfg" {
   logs_role_arn = local.logs_org_role_arn
   cfg_role_arn  = local.cfg_org_role_arn
 
-  managed_rules = [for rule in local.cfg_managed_rules :
+  managed_rules = [for rule in concat(local.cfg_managed_rules, 
+    [ for default_rule in local.default_managed_rules: default_rule.enable ? default_rule : null]):
     merge(rule, {
       excluded_accounts = concat(rule.exclude_root ? [data.aws_caller_identity.master.id] : [], [for name in rule.excluded_accounts : module.accounts.child_accounts[name].id])
       included_accounts = [for name in rule.included_accounts : module.accounts.child_accounts[name].id]

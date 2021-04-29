@@ -141,3 +141,72 @@ variable "cfg_custom_rules" {
   }))
   default = []
 }
+
+variable "ct_enabled_rule" {
+  description = <<EOF
+  Configurations for default rule: CLOUD_TRAIL_ENABLED. Rule checks if Cloudtrail is 
+  enabled within each account that within `included_accounts` or not within 
+  `excluded_accounts` attribute"
+  EOF
+  type = object({
+    enable = optional(bool)
+    name                        = optional(string)
+    included_accounts           = optional(list(string))
+    excluded_accounts           = optional(list(string))
+    exclude_root                = optional(bool)
+    maximum_execution_frequency = optional(string)
+    tags                        = optional(map(string))
+  })
+  default = {}
+}
+
+variable "gd_enabled_centralized_rule" {
+  description = <<EOF
+  Configurations for default rule: GUARDDUTY_ENABLED_CENTRALIZED. Rule checks if GuardDuty is 
+  enabled within the config AWS account ID. Config AWS account can be specified via is_cfg attribute within `var.child_accounts`
+  EOF
+  type = object({
+    enable = optional(bool)
+    name                        = optional(string)
+    included_accounts           = optional(list(string))
+    excluded_accounts           = optional(list(string))
+    exclude_root                = optional(bool)
+    maximum_execution_frequency = optional(string)
+    tags                        = optional(map(string))
+  })
+  default = {}
+}
+
+variable "ct_cw_logs_enabled_rule" {
+  description = <<EOF
+  Configurations for default rule: CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED. Rule checks if 
+  CloudTrail CloudWatch logs are enabled within AWS Organization's master account
+  EOF
+  type = object({
+    enable = optional(bool)
+    name                        = optional(string)
+    included_accounts           = optional(list(string))
+    excluded_accounts           = optional(list(string))
+    exclude_root                = optional(bool)
+    maximum_execution_frequency = optional(string)
+    tags                        = optional(map(string))
+  })
+  default = {}
+}
+
+variable "account_part_of_org_rule" {
+  description = <<EOF
+  Configurations for default rule: ACCOUNT_PART_OF_ORGANIZATIONS. Rule checks if 
+  member AWS account's organization master account ID is valid
+  EOF
+  type = object({
+    enable = optional(bool)
+    name                        = optional(string)
+    included_accounts           = optional(list(string))
+    excluded_accounts           = optional(list(string))
+    exclude_root                = optional(bool)
+    maximum_execution_frequency = optional(string)
+    tags                        = optional(map(string))
+  })
+  default = {}
+}
