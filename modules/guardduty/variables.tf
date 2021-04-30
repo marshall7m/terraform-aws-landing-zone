@@ -1,5 +1,11 @@
 variable "logs_arn" {
-  description = "ARN of the account to create the AWS S3 bucket and KMS CMK. If not specified, defaults to primary provider."
+  description = "IAM role ARN the `aws.logs` provider will assume to create the AWS S3 bucket and KMS CMK used to store GuardDuty findings. If not specified, defaults to the aws caller."
+  type        = string
+  default     = null
+}
+
+variable "gd_arn" {
+  description = "IAM role ARN the primary provider will assume to create the AWS GuardDuty resources within its respective account. If not specified, defaults to the aws caller."
   type        = string
   default     = null
 }

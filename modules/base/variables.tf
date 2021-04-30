@@ -149,7 +149,7 @@ variable "ct_enabled_rule" {
   `excluded_accounts` attribute"
   EOF
   type = object({
-    enable = optional(bool)
+    enable                      = optional(bool)
     name                        = optional(string)
     included_accounts           = optional(list(string))
     excluded_accounts           = optional(list(string))
@@ -166,7 +166,7 @@ variable "gd_enabled_centralized_rule" {
   enabled within the config AWS account ID. Config AWS account can be specified via is_cfg attribute within `var.child_accounts`
   EOF
   type = object({
-    enable = optional(bool)
+    enable                      = optional(bool)
     name                        = optional(string)
     included_accounts           = optional(list(string))
     excluded_accounts           = optional(list(string))
@@ -183,7 +183,7 @@ variable "ct_cw_logs_enabled_rule" {
   CloudTrail CloudWatch logs are enabled within AWS Organization's master account
   EOF
   type = object({
-    enable = optional(bool)
+    enable                      = optional(bool)
     name                        = optional(string)
     included_accounts           = optional(list(string))
     excluded_accounts           = optional(list(string))
@@ -200,7 +200,7 @@ variable "account_part_of_org_rule" {
   member AWS account's organization master account ID is valid
   EOF
   type = object({
-    enable = optional(bool)
+    enable                      = optional(bool)
     name                        = optional(string)
     included_accounts           = optional(list(string))
     excluded_accounts           = optional(list(string))

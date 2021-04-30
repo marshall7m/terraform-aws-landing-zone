@@ -108,10 +108,10 @@ variable "conformance_packs" {
   type = list(object({
     name = string
     inputs_parameters = optional(list(object({
-      name = string
+      name  = string
       value = string
     })))
-    template_body = optional(string)
+    template_body   = optional(string)
     template_s3_uri = optional(string)
   }))
   default = []

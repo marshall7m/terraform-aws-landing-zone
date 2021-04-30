@@ -12,10 +12,6 @@ locals {
   bucket_name = coalesce(var.bucket_name, lower("guardduty-logs-${random_uuid.gd_bucket[0].id}"))
 }
 
-resource "random_uuid" "gd_bucket" {
-  count = var.bucket_name == null ? 1 : 0
-}
-
 resource "aws_guardduty_detector" "this" {
   enable = var.enable
 }
@@ -26,15 +22,45 @@ resource "aws_guardduty_organization_configuration" "this" {
   detector_id = aws_guardduty_detector.this.id
 }
 
-resource "aws_guardduty_organization_admin_account" "this" {
-  count            = var.is_organization_gd != null ? 1 : 0
-  admin_account_id = data.aws_caller_identity.gd.id
+resource "aws_guardduty_publishing_destination" "this" {
+  count = var.create_gd_s3_bucket ? 1 : 0
+
+  detector_id     = aws_guardduty_detector.this.id
+  destination_arn = aws_s3_bucket.this[0].arn
+  kms_key_arn     = module.cmk[0].arn
+}
+
+#tfsec:ignore:AWS002
+resource "aws_s3_bucket" "this" {
+  count    = var.create_gd_s3_bucket ? 1 : 0
+  provider = aws.logs
+
+  bucket        = local.bucket_name
+  acl           = "private"
+  force_destroy = true
+  versioning {
+    enabled = true
+  }
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = module.cmk[0].arn
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
+  policy = data.aws_iam_policy_document.s3[0].json
+}
+
+resource "random_uuid" "gd_bucket" {
+  count = var.bucket_name == null ? 1 : 0
 }
 
 data "aws_iam_policy_document" "s3" {
   count    = var.create_gd_s3_bucket ? 1 : 0
   provider = aws.logs
-  
+
   statement {
     sid = "GuardDutyWriteAccess"
     actions = [
@@ -153,25 +179,4 @@ module "cmk" {
       ]
     }
   ]
-}
-
-resource "aws_s3_bucket" "this" {
-  count    = var.create_gd_s3_bucket ? 1 : 0
-  provider = aws.logs
-
-  bucket        = local.bucket_name
-  acl           = "private"
-  force_destroy = true
-  versioning {
-    enabled = true
-  }
-  policy = data.aws_iam_policy_document.s3[0].json
-}
-
-resource "aws_guardduty_publishing_destination" "this" {
-  count    = var.create_gd_s3_bucket ? 1 : 0
-
-  detector_id     = aws_guardduty_detector.this.id
-  destination_arn = aws_s3_bucket.this[0].arn
-  kms_key_arn     = module.cmk[0].arn
 }

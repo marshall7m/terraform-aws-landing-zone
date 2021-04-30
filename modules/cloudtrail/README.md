@@ -41,3 +41,4 @@
 | ct\_arn | n/a |
 | cw\_log\_group\_arn | n/a |
 | s3\_bucket\_arn | n/a |
+| s3\_bucket\_name | n/a |

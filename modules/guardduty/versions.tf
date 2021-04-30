@@ -19,3 +19,9 @@ provider "aws" {
   }
   alias = "logs"
 }
+
+provider "aws" {
+  assume_role {
+    role_arn = var.gd_arn
+  }
+}

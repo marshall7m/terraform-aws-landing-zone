@@ -1,17 +1,16 @@
+locals {
+  child_accounts = [for account in var.child_accounts : defaults(account, {
+    role_name = "OrganizationAccountAccessRole"
+  })]
+  #sets product for account and each associated policy
+  account_policies = chunklist(flatten([for account in local.child_accounts : try(setproduct([account.name], account.policies), [])]), 2)
+}
+
 resource "aws_organizations_organization" "this" {
   count                         = var.create_organization ? 1 : 0
   aws_service_access_principals = var.aws_service_access_principals
 
   feature_set = var.feature_set
-}
-
-locals {
-  #sets product for account and each associated policy
-  account_policies = chunklist(flatten([for account in var.child_accounts : try(setproduct([account.name], account.policies), [])]), 2)
-  child_accounts = [for account in var.child_accounts : defaults(account, {
-    role_name                  = "OrganizationAccountAccessRole"
-    iam_user_access_to_billing = false
-  })]
 }
 
 resource "aws_organizations_policy" "this" {
@@ -30,13 +29,12 @@ resource "aws_organizations_policy_attachment" "this" {
 }
 
 resource "aws_organizations_account" "this" {
-  for_each  = { for account in local.child_accounts : account.name => account }
-  name      = each.value.name
-  parent_id = each.value.parent_id
-  email     = each.value.email
-  role_name = each.value.role_name
-  # iam_user_access_to_billing = each.value.iam_user_access_to_billing ? "ALLOW" : "DENY"
-  iam_user_access_to_billing = null
+  for_each                   = { for account in local.child_accounts : account.name => account }
+  name                       = each.value.name
+  parent_id                  = each.value.parent_id
+  email                      = each.value.email
+  role_name                  = each.value.role_name
+  iam_user_access_to_billing = try(each.value.iam_user_access_to_billing ? "ALLOW" : "DENY", null)
   tags                       = each.value.tags
 
   # There is no AWS Organizations API for reading role_name

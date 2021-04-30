@@ -12,7 +12,7 @@ locals {
   org_account_ids = data.aws_organizations_organization.this.accounts[*].id
   org_id          = data.aws_organizations_organization.this.id
   aggregator_name = coalesce(var.aggregator_name, "${local.org_id}-delegated-admin-aggregator")
-  recorder_name = coalesce(var.recorder_name, "${local.org_id}-cfg-recorder")
+  recorder_name   = coalesce(var.recorder_name, "${local.org_id}-cfg-recorder")
 
   bucket_name       = coalesce(var.bucket_name, lower("config-logs-${random_uuid.bucket.id}"))
   bucket_key_prefix = var.bucket_key_prefix != null ? "${var.bucket_key_prefix}/" : ""
@@ -51,10 +51,10 @@ resource "aws_config_delivery_channel" "this" {
 }
 
 module "cfg_recorder_role" {
-  source = "github.com/marshall7m/terraform-aws-iam/modules//iam-role"
+  source    = "github.com/marshall7m/terraform-aws-iam/modules//iam-role"
   role_name = local.recorder_name
 
-  trusted_services = ["config.amazonaws.com"]
+  trusted_services        = ["config.amazonaws.com"]
   custom_role_policy_arns = ["arn:aws:iam::aws:policy/service-role/AWS_ConfigRole"]
   statements = [
     {
@@ -66,7 +66,7 @@ module "cfg_recorder_role" {
       resources = ["arn:aws:s3:::${local.bucket_name}/${local.bucket_key_prefix}AWSLogs/${data.aws_caller_identity.logs.id}/*"]
       conditions = [
         {
-          test = "StringLike"
+          test     = "StringLike"
           variable = "s3:x-amz-acl"
           values = [
             "bucket-owner-full-control"
@@ -75,8 +75,8 @@ module "cfg_recorder_role" {
       ]
     },
     {
-      effect = "Allow"
-      actions = ["s3:GetBucketAcl"]
+      effect    = "Allow"
+      actions   = ["s3:GetBucketAcl"]
       resources = ["arn:aws:s3:::${local.bucket_name}"]
     },
     {
@@ -95,8 +95,8 @@ module "cfg_recorder_role" {
       resources = [module.cmk.arn]
     },
     {
-      effect = "Allow"
-      actions = ["sns:Publish"]
+      effect    = "Allow"
+      actions   = ["sns:Publish"]
       resources = ["*"]
     }
   ]

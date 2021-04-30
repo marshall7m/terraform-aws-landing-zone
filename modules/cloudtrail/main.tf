@@ -167,6 +167,7 @@ module "cmk" {
 
 resource "random_uuid" "ct_bucket" {}
 
+#tfsec:ignore:AWS002
 resource "aws_s3_bucket" "this" {
   provider      = aws.logs
   bucket        = local.bucket_name
@@ -174,7 +175,14 @@ resource "aws_s3_bucket" "this" {
   versioning {
     enabled = true
   }
-
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = module.cmk.arn
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
   policy = data.aws_iam_policy_document.ct_bucket.json
 }
 

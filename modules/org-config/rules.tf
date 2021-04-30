@@ -44,11 +44,11 @@ module "lambda" {
 }
 
 resource "aws_config_conformance_pack" "this" {
-  for_each = { for pack in var.conformance_packs: pack.name => pack }
-  name = each.value.name
+  for_each = { for pack in var.conformance_packs : pack.name => pack }
+  name     = each.value.name
 
   dynamic "input_parameter" {
-    for_each = { for param in each.value.input_parameters: param.name => param}
+    for_each = { for param in each.value.input_parameters : param.name => param }
     content {
       parameter_name  = input_parameter.value.name
       parameter_value = input_parameter.value.value
