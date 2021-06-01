@@ -1,3 +1,3 @@
 locals {
-  include_aws    = true
+  include_aws = true
 }

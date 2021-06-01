@@ -1,3 +1,5 @@
+#!/bin/bash
+
 catch_exception="AccountAlreadyRegisteredException"
 
 if [ -n ${master_account_role_arn} ]; then

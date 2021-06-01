@@ -140,6 +140,7 @@ likelyhood of the root account being compromised within that process.
 resource "null_resource" "delegate_config" {
   provisioner "local-exec" {
     command = templatefile("files/delegate_admin.sh", {
+      # if the calling master account entity is a role then pass the role so the script can assume the role
       master_account_role_arn = split("/", data.aws_caller_identity.master.arn)[0] == "user" ? null : data.aws_caller_identity.master.arn
       account_id              = data.aws_arn.cfg_org_role_arn.account
       principal               = "config.amazonaws.com"
@@ -150,6 +151,7 @@ resource "null_resource" "delegate_config" {
 resource "null_resource" "delegate_config_multiaccountsetup" {
   provisioner "local-exec" {
     command = templatefile("files/delegate_admin.sh", {
+      # if the calling master account entity is a role then pass the role so the script can assume the role
       master_account_role_arn = split("/", data.aws_caller_identity.master.arn)[0] == "user" ? null : data.aws_caller_identity.master.arn
       account_id              = data.aws_arn.cfg_org_role_arn.account
       principal               = "config-multiaccountsetup.amazonaws.com"
@@ -163,6 +165,7 @@ resource "null_resource" "delegate_config_multiaccountsetup" {
 resource "null_resource" "delegate_guardduty" {
   provisioner "local-exec" {
     command = templatefile("files/delegate_admin.sh", {
+      # if the calling master account entity is a role then pass the role so the script can assume the role
       master_account_role_arn = split("/", data.aws_caller_identity.master.arn)[0] == "user" ? null : data.aws_caller_identity.master.arn
       account_id              = data.aws_arn.cfg_org_role_arn.account
       principal               = "guardduty.amazonaws.com"

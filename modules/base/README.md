@@ -1,6 +1,6 @@
 # base
 
-Create and manage AWS Organization member accounts and apply auditing and compliance services to meet security requirements needed by your organization.
+Create and manage AWS Organization member accounts and apply auditing/compliance services to meet security requirements needed by your organization.
 
 ## Features
 - Accounts: Creates an AWS Organizations with member accounts. See more at `../accounts`
@@ -64,14 +64,15 @@ module "base" {
 |------|---------|
 | terraform | >= 0.15.0 |
 | aws | >= 2.42 |
-| random | 3.1.0 |
+| null | >=3.1.0 |
+| random | >=3.1.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | aws | >= 2.42 |
-| null | n/a |
+| null | >=3.1.0 |
 
 ## Inputs
 
