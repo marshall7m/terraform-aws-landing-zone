@@ -1,3 +1,4 @@
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
@@ -35,3 +36,4 @@
 |------|-------------|
 | cmk\_arn | n/a |
 | s3\_bucket\_arn | n/a |
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

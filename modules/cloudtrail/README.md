@@ -1,3 +1,5 @@
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
 ## Requirements
 
 | Name | Version |
@@ -42,3 +44,10 @@
 | cw\_log\_group\_arn | n/a |
 | s3\_bucket\_arn | n/a |
 | s3\_bucket\_name | n/a |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+## TODO
+- Setup CT mode: data event, insights, etc
+- add MFA delete
+- add MFA delete policy to s3

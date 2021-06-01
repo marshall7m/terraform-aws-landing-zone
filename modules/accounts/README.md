@@ -1,3 +1,5 @@
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
@@ -26,3 +28,5 @@
 | Name | Description |
 |------|-------------|
 | child\_accounts | n/a |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
