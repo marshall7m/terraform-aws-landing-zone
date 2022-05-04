@@ -1,17 +1,11 @@
-include {
-  path = find_in_parent_folders()
-}
-
-terraform {
+module "mut_accounts" {
   source = "../../modules//accounts"
-}
 
-inputs = {
   create_organization = true
   policies = [
     {
       name    = "tags"
-      content = jsonencode(yamldecode(file("policies.yaml")))
+      content = jsonencode(yamldecode(file("${path.module}/policies.yaml")))
     }
   ]
   child_accounts = [
