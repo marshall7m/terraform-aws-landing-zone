@@ -34,8 +34,9 @@
 
 
 `base`:
+
     - Configures all of the organization-level modules mentioned above into one easily definable module
-    - Applies default managed AWS config rules: (all of which should be covered by this module)
+    - Applies default managed AWS Config rules: (all of which should be covered by this module)
         - CLOUD_TRAIL_ENABLED
         - GUARDDUTY_ENABLED_CENTRALIZED
         - CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED
