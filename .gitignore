@@ -1,4 +1,3 @@
-account.hcl
 terraform.tfstate*
 *.terraform*
 *.terragrunt-cache*
@@ -7,3 +6,12 @@ terraform.tfstate*
 __pycache__
 .wget-hsts
 .bash_history
+*.zip*
+*deps/
+*tmp*
+/node_modules
+/package-lock.json
+/yarn.lock
+/yarn-error.log
+build/*
+/*.egg-info

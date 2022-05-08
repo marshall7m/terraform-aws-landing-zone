@@ -1,7 +1,6 @@
 # Terraform AWS Custom Landing Zone
 
-
-## Features
+## Modules
 
 `account-config`:
     
@@ -12,11 +11,11 @@
     
     - Applies organization-level AWS Config custom or managed rules and/or conformance packs
     - Creates AWS Lambda function to host each custom rule
-    - Creates AWS S3 bucket with KMS encryption to store Config logs
+    - Creates AWS S3 bucket with KMS encryption to store AWS Config logs
 
 `accounts`:
 
-    - Creates AWS organization within calling AWS account\
+    - Creates AWS organization within calling AWS account
     - Provisions member accounts with a role that a root organization entity can assume for Administrative access to the account
     - Apply organization-level or account-level policies to member accounts
 
