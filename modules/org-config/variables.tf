@@ -65,11 +65,10 @@ variable "cmk_trusted_admin_arns" {
 }
 
 variable "managed_rules" {
-  description = "List of custom or AWS managed rules to apply to specified organization accounts"
+  description = "List of AWS managed rules to apply to specified organization accounts"
   type = list(object({
     name                        = string
     description                 = optional(string)
-    included_accounts           = optional(list(string))
     excluded_accounts           = optional(list(string))
     input_parameters            = optional(map(string))
     rule_identifier             = string
@@ -80,14 +79,12 @@ variable "managed_rules" {
 }
 
 variable "custom_rules" {
-  description = "List of custom or AWS managed rules to apply to specified organization accounts"
+  description = "List of custom rules to apply to specified organization accounts"
   type = list(object({
     name                        = string
     description                 = optional(string)
-    included_accounts           = optional(list(string))
     excluded_accounts           = optional(list(string))
     input_parameters            = optional(map(string))
-    rule_identifier             = string
     maximum_execution_frequency = optional(string)
     tags                        = optional(map(string))
 

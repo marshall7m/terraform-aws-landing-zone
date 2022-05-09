@@ -1,11 +1,12 @@
 resource "aws_config_organization_managed_rule" "this" {
-  for_each = { for rule in local.managed_rules : rule.name => rule }
+  for_each = length(var.managed_rules) > 0 ? { for rule in var.managed_rules : rule.name => rule } : {}
 
-  name              = each.value.name
-  rule_identifier   = each.value.rule_identifier
-  input_parameters  = jsonencode(each.value.input_parameters)
-  excluded_accounts = each.value.excluded_accounts != [] ? each.value.excluded_accounts : each.value.included_accounts != [] ? setsubtract(local.org_account_ids, each.value.included_accounts) : null
-
+  name                        = each.value.name
+  rule_identifier             = each.value.rule_identifier
+  input_parameters            = jsonencode(each.value.input_parameters)
+  description                 = each.value.description
+  excluded_accounts           = each.value.excluded_accounts
+  maximum_execution_frequency = each.value.maximum_execution_frequency
   depends_on = [
     aws_config_configuration_aggregator.this
   ]
@@ -14,10 +15,13 @@ resource "aws_config_organization_managed_rule" "this" {
 resource "aws_config_organization_custom_rule" "this" {
   for_each = { for rule in var.custom_rules : rule.name => rule }
 
-  lambda_function_arn = module.lambda[each.value.name].function_arn
-  name                = each.value.name
-  trigger_types       = each.value.trigger_types
-
+  lambda_function_arn         = module.lambda[each.value.name].function_arn
+  name                        = each.value.name
+  trigger_types               = each.value.trigger_types
+  input_parameters            = jsonencode(each.value.input_parameters)
+  description                 = each.value.description
+  maximum_execution_frequency = each.value.maximum_execution_frequency
+  excluded_accounts           = each.value.excluded_accounts
   depends_on = [
     module.lambda
   ]
@@ -25,7 +29,7 @@ resource "aws_config_organization_custom_rule" "this" {
 
 module "lambda" {
   for_each = { for rule in var.custom_rules : rule.name => rule }
-  source   = "github.com/marshall7m/terraform-aws-lambda/modules//function"
+  source   = "github.com/marshall7m/terraform-aws-lambda"
 
   function_name = each.value.function_name
   handler       = each.value.handler

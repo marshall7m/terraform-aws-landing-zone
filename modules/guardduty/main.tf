@@ -38,19 +38,34 @@ resource "aws_s3_bucket" "this" {
   bucket        = local.bucket_name
   acl           = "private"
   force_destroy = true
-  versioning {
-    enabled = true
+}
+
+resource "aws_s3_bucket_versioning" "this" {
+  count    = var.create_gd_s3_bucket ? 1 : 0
+  provider = aws.logs
+  bucket   = aws_s3_bucket.this[0].id
+  versioning_configuration {
+    status = "Enabled"
   }
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = module.cmk[0].arn
-        sse_algorithm     = "aws:kms"
-      }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+  count    = var.create_gd_s3_bucket ? 1 : 0
+  provider = aws.logs
+  bucket   = aws_s3_bucket.this[0].id
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = module.cmk[0].arn
+      sse_algorithm     = "aws:kms"
     }
   }
+}
 
-  policy = data.aws_iam_policy_document.s3[0].json
+resource "aws_s3_bucket_policy" "this" {
+  count    = var.create_gd_s3_bucket ? 1 : 0
+  provider = aws.logs
+  bucket   = aws_s3_bucket.this[0].id
+  policy   = data.aws_iam_policy_document.s3[0].json
 }
 
 resource "random_uuid" "gd_bucket" {

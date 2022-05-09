@@ -3,7 +3,7 @@
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.15.0 |
+| terraform | >= 1.0.0 |
 | aws | >= 2.42 |
 | random | 3.1.0 |
 

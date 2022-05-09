@@ -1,15 +1,10 @@
+data "aws_caller_identity" "cfg" {}
+
 data "aws_organizations_organization" "this" {
   provider = aws.master
 }
 
-data "aws_caller_identity" "cfg" {}
-
 locals {
-  managed_rules = [for rule in var.managed_rules : defaults(rule, {
-    included_accounts = ""
-    excluded_accounts = ""
-  })]
-  org_account_ids = data.aws_organizations_organization.this.accounts[*].id
   org_id          = data.aws_organizations_organization.this.id
   aggregator_name = coalesce(var.aggregator_name, "${local.org_id}-delegated-admin-aggregator")
   recorder_name   = coalesce(var.recorder_name, "${local.org_id}-cfg-recorder")

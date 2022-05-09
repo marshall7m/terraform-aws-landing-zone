@@ -172,18 +172,32 @@ resource "aws_s3_bucket" "this" {
   provider      = aws.logs
   bucket        = local.bucket_name
   force_destroy = true
-  versioning {
-    enabled = true
+}
+
+resource "aws_s3_bucket_versioning" "this" {
+  provider = aws.logs
+  bucket   = aws_s3_bucket.this.id
+  versioning_configuration {
+    status = "Enabled"
   }
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = module.cmk.arn
-        sse_algorithm     = "aws:kms"
-      }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+  provider = aws.logs
+  bucket   = aws_s3_bucket.this.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = module.cmk.arn
+      sse_algorithm     = "aws:kms"
     }
   }
-  policy = data.aws_iam_policy_document.ct_bucket.json
+}
+
+resource "aws_s3_bucket_policy" "this" {
+  provider = aws.logs
+  bucket   = aws_s3_bucket.this.id
+  policy   = data.aws_iam_policy_document.ct_bucket.json
 }
 
 data "aws_iam_policy_document" "ct_bucket" {
