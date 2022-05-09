@@ -1,5 +1,5 @@
 module "mut_accounts" {
-  source = "../../modules//accounts"
+  source = "../../../../modules//accounts"
 
   create_organization = true
   policies = [

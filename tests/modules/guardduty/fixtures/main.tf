@@ -1,11 +1,7 @@
-terraform {
-  required_version = ">= 0.15.0"
-}
-
 data "aws_caller_identity" "current" {}
 
 module "mut_guardduty" {
-  source = "../../modules//guardduty"
+  source = "../../../../modules//guardduty"
   providers = {
     aws.gd = aws
     aws.s3 = aws

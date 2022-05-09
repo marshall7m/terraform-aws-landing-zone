@@ -1,6 +1,5 @@
-module "mut_config" {
-  source = "../../modules//config"
-
+module "mut_account_config" {
+  source = "../../../../modules//account-config"
   rules = [
     {
       name              = "test-ct-enabled"
@@ -8,5 +7,4 @@ module "mut_config" {
       source_identifier = "CLOUD_TRAIL_ENABLED"
     }
   ]
-
 }
