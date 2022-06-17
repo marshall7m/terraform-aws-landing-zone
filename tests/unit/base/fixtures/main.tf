@@ -1,5 +1,9 @@
+
 module "mut_base" {
   source = "../../../../"
+  providers = {
+    aws = aws
+   }
   child_accounts = [
     {
       name      = "test_logs_account"
