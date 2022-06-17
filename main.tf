@@ -1,4 +1,3 @@
-provider "aws" {}
 data "aws_caller_identity" "master" {}
 
 locals {
@@ -126,55 +125,30 @@ module "cloudtrail" {
 }
 
 
-#TODO: `Add aws_organizations_delegated_adminstrator` when resource is added: https://github.com/hashicorp/terraform-provider-aws/issues/14932
-
 /*
-The 3 `null_resource` blocks below will configure the config AWS account as a delegated admin of
-AWS Config, Config MultiAccountSetup, and GuardDuty. This is needed in order to provision
-these services within the config account. The main purpose of these services being hosted 
-within the config account instead of the root account is security. Specifically,
+The 3 `aws_organizations_delegated_administrator` resources below will configure the config AWS account 
+as a delegated admin of AWS Config, Config MultiAccountSetup, and GuardDuty. This is needed 
+in order to provision these services within the config account. The main purpose of these services 
+being hosted within the config account instead of the root account is security. Specifically,
 this will reduce the amount of services that will be maintained and monitored via
 the root account which will decrease the need to access the root account and the 
-likelyhood of the root account being compromised within that process. 
+likelyhood of the root account being compromised within the process. 
 */
 
-resource "null_resource" "delegate_config" {
-  provisioner "local-exec" {
-    command = templatefile("${path.module}/files/delegate_admin.sh", {
-      # if the calling master account entity is a role then pass the role so the script can assume the role
-      master_account_role_arn = split("/", data.aws_caller_identity.master.arn)[0] == "user" ? null : data.aws_caller_identity.master.arn
-      account_id              = data.aws_arn.cfg_org_role_arn.account
-      principal               = "config.amazonaws.com"
-    })
-  }
+
+resource "aws_organizations_delegated_administrator" "config" {
+  account_id        = data.aws_arn.cfg_org_role_arn.account
+  service_principal = "config.amazonaws.com"
 }
 
-resource "null_resource" "delegate_config_multiaccountsetup" {
-  provisioner "local-exec" {
-    command = templatefile("${path.module}/files/delegate_admin.sh", {
-      # if the calling master account entity is a role then pass the role so the script can assume the role
-      master_account_role_arn = split("/", data.aws_caller_identity.master.arn)[0] == "user" ? null : data.aws_caller_identity.master.arn
-      account_id              = data.aws_arn.cfg_org_role_arn.account
-      principal               = "config-multiaccountsetup.amazonaws.com"
-    })
-  }
-  depends_on = [
-    null_resource.delegate_config
-  ]
+resource "aws_organizations_delegated_administrator" "config_multi_account_setup" {
+  account_id        = data.aws_arn.cfg_org_role_arn.account
+  service_principal = "config-multiaccountsetup.amazonaws.com"
 }
 
-resource "null_resource" "delegate_guardduty" {
-  provisioner "local-exec" {
-    command = templatefile("${path.module}/files/delegate_admin.sh", {
-      # if the calling master account entity is a role then pass the role so the script can assume the role
-      master_account_role_arn = split("/", data.aws_caller_identity.master.arn)[0] == "user" ? null : data.aws_caller_identity.master.arn
-      account_id              = data.aws_arn.cfg_org_role_arn.account
-      principal               = "guardduty.amazonaws.com"
-    })
-  }
-  depends_on = [
-    null_resource.delegate_config_multiaccountsetup
-  ]
+resource "aws_organizations_delegated_administrator" "guardduty" {
+  account_id        = data.aws_arn.cfg_org_role_arn.account
+  service_principal = "guardduty.amazonaws.com"
 }
 
 resource "aws_guardduty_organization_admin_account" "cfg_account" {
