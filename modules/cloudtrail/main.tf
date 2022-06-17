@@ -96,24 +96,6 @@ module "kms_key" {
       actions   = ["kms:DescribeKey"]
       resources = ["*"]
     },
-    # {
-    #   sid    = "CloudTrailUsage"
-    #   effect = "Allow"
-    #   actions = [
-    #     "kms:Encrypt",
-    #     "kms:Decrypt",
-    #     "kms:ReEncrypt*",
-    #     "kms:GenerateDataKey*",
-    #     "kms:DescribeKey"
-    #   ]
-    #   principals = [
-    #     {
-    #       type        = "Service"
-    #       identifiers = ["cloudtrail.amazonaws.com"]
-    #     }
-    #   ]
-    #   resources = ["*"]
-    # },
     {
       sid    = "CreateAliasAccess"
       effect = "Allow"
