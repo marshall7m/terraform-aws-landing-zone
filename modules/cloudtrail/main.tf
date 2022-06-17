@@ -37,7 +37,7 @@ resource "aws_cloudtrail" "this" {
 }
 
 module "ct_role" {
-  source           = "github.com/marshall7m/terraform-aws-iam/modules//iam-role"
+  source           = "github.com/marshall7m/terraform-aws-iam//modules/iam-role?ref=0.1.0"
   role_name        = var.name
   trusted_services = ["cloudtrail.amazonaws.com"]
   custom_role_policy_arns = [

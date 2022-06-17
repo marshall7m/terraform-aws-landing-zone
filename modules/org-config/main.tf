@@ -14,7 +14,7 @@ locals {
 }
 
 module "aggregator_role" {
-  source                  = "github.com/marshall7m/terraform-aws-iam/modules//iam-role"
+  source                  = "github.com/marshall7m/terraform-aws-iam//modules/iam-role?ref=0.1.0"
   role_name               = local.aggregator_name
   trusted_services        = ["config.amazonaws.com"]
   custom_role_policy_arns = ["arn:aws:iam::aws:policy/service-role/AWSConfigRoleForOrganizations"]
@@ -46,7 +46,7 @@ resource "aws_config_delivery_channel" "this" {
 }
 
 module "cfg_recorder_role" {
-  source    = "github.com/marshall7m/terraform-aws-iam/modules//iam-role"
+  source    = "github.com/marshall7m/terraform-aws-iam//modules/iam-role?ref=0.1.0"
   role_name = local.recorder_name
 
   trusted_services        = ["config.amazonaws.com"]

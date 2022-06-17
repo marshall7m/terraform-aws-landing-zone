@@ -29,7 +29,7 @@ resource "aws_config_organization_custom_rule" "this" {
 
 module "lambda" {
   for_each = { for rule in var.custom_rules : rule.name => rule }
-  source   = "github.com/marshall7m/terraform-aws-lambda"
+  source   = "github.com/marshall7m/terraform-aws-lambda?ref=0.1.0"
 
   function_name = each.value.function_name
   handler       = each.value.handler
