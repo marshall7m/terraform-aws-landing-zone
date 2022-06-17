@@ -81,7 +81,7 @@ data "aws_arn" "cfg_org_role_arn" {
 }
 
 module "accounts" {
-  source = "..//accounts"
+  source = "./modules//accounts"
 
   create_organization = var.create_organization
   child_accounts      = var.child_accounts
@@ -95,7 +95,7 @@ module "accounts" {
 }
 
 module "guardduty" {
-  source   = "..//guardduty"
+  source   = "./modules//guardduty"
   logs_arn = local.logs_org_role_arn
   /*
   used as a workaround to implicitly create a dependency on 
@@ -114,7 +114,7 @@ module "guardduty" {
 }
 
 module "cloudtrail" {
-  source   = "..//cloudtrail"
+  source   = "./modules//cloudtrail"
   logs_arn = local.logs_org_role_arn
 
   enable_logging             = var.ct_is_active
@@ -156,7 +156,7 @@ resource "aws_guardduty_organization_admin_account" "cfg_account" {
 }
 
 module "org_cfg" {
-  source = "..//org-config"
+  source = "./modules//org-config"
   providers = {
     aws.master = aws
   }
