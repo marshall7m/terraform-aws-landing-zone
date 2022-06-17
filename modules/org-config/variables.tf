@@ -58,7 +58,7 @@ variable "bucket_name" {
   default     = null
 }
 
-variable "cmk_trusted_admin_arns" {
+variable "kms_key_trusted_admin_arns" {
   description = "Trusted ARNs that will have administrative permissions for AWS KMS CMK"
   type        = list(string)
   default     = []

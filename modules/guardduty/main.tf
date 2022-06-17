@@ -27,7 +27,7 @@ resource "aws_guardduty_publishing_destination" "this" {
 
   detector_id     = aws_guardduty_detector.this.id
   destination_arn = aws_s3_bucket.this[0].arn
-  kms_key_arn     = module.cmk[0].arn
+  kms_key_arn     = module.kms_key[0].arn
 }
 
 #tfsec:ignore:AWS002
@@ -55,7 +55,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
   bucket   = aws_s3_bucket.this[0].id
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = module.cmk[0].arn
+      kms_master_key_id = module.kms_key[0].arn
       sse_algorithm     = "aws:kms"
     }
   }
@@ -162,18 +162,19 @@ data "aws_iam_policy_document" "s3" {
       condition {
         test     = "StringNotEquals"
         variable = "s3:x-amz-server-side-encryption-aws-kms-key-id"
-        values   = [module.cmk[0].arn]
+        values   = [module.kms_key[0].arn]
       }
     }
   }
 }
 
-module "cmk" {
+module "kms_key" {
+  source = "github.com/marshall7m/terraform-aws-kms?ref=v0.1.0"
+
   count = var.create_gd_s3_bucket ? 1 : 0
   providers = {
     aws = aws.logs
   }
-  source                  = "github.com/marshall7m/terraform-aws-kms/modules//cmk"
   trusted_admin_arns      = var.trusted_iam_kms_admin_arns
   trusted_user_usage_arns = var.trusted_iam_kms_usage_arns
 

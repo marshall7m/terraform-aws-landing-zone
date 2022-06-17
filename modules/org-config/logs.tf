@@ -25,7 +25,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = module.cmk.arn
+      kms_master_key_id = module.kms_key.arn
       sse_algorithm     = "aws:kms"
     }
   }
@@ -82,14 +82,14 @@ data "aws_iam_policy_document" "bucket" {
     }
   }
 }
+module "kms_key" {
+  source = "github.com/marshall7m/terraform-aws-kms?ref=v0.1.0"
 
-module "cmk" {
-  source = "github.com/marshall7m/terraform-aws-kms/modules//cmk"
   providers = {
     aws = aws.logs
   }
 
-  trusted_admin_arns = length(var.cmk_trusted_admin_arns) > 0 ? var.cmk_trusted_admin_arns : [var.logs_role_arn]
+  trusted_admin_arns = length(var.kms_key_trusted_admin_arns) > 0 ? var.kms_key_trusted_admin_arns : [var.logs_role_arn]
   statements = [
     {
       sid    = "AWSConfig"

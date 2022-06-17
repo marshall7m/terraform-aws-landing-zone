@@ -87,7 +87,7 @@ module "cfg_recorder_role" {
         "kms:Decrypt",
         "kms:GenerateDataKey"
       ]
-      resources = [module.cmk.arn]
+      resources = [module.kms_key.arn]
     },
     {
       effect    = "Allow"
