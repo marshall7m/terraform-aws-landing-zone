@@ -42,7 +42,7 @@ jobs:
           pre-commit run --all-files
 
   unit:
-    needs: precommit
+    # needs: precommit
     runs-on: ubuntu-latest
     container: ghcr.io/marshall7m/terrace:v0.1.5
     permissions:
@@ -76,4 +76,4 @@ jobs:
         id: pytest
         shell: bash
         run: |
-          pytest -vv tests/unit
+          pytest -vv tests/unit --skip-tf-destroy
