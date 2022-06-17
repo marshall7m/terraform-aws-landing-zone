@@ -107,7 +107,7 @@ module "base" {
 | Name | Version |
 |------|---------|
 | terraform | >= 1.0.0 |
-| aws | >= 2.42 |
+| aws | >= 3.41.0 |
 | null | >=3.1.0 |
 | random | >=3.1.0 |
 
@@ -115,8 +115,7 @@ module "base" {
 
 | Name | Version |
 |------|---------|
-| aws | >= 2.42 |
-| null | >=3.1.0 |
+| aws | >= 3.41.0 |
 
 ## Inputs
 
