@@ -36,8 +36,15 @@ resource "aws_s3_bucket" "this" {
   provider = aws.logs
 
   bucket        = local.bucket_name
-  acl           = "private"
   force_destroy = true
+}
+
+resource "aws_s3_bucket_acl" "this" {
+  count    = var.create_gd_s3_bucket ? 1 : 0
+  provider = aws.logs
+  
+  bucket = aws_s3_bucket.this.id
+  acl    = "private"
 }
 
 resource "aws_s3_bucket_versioning" "this" {
