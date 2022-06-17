@@ -5,7 +5,7 @@
 |------|---------|
 | terraform | >= 1.0.0 |
 | aws | >= 2.42 |
-| random | 3.1.0 |
+| random | >=3.1.0 |
 
 ## Providers
 
@@ -13,7 +13,7 @@
 |------|---------|
 | aws | >= 2.42 |
 | aws.logs | >= 2.42 |
-| random | 3.1.0 |
+| random | >=3.1.0 |
 
 ## Inputs
 
@@ -21,10 +21,10 @@
 |------|-------------|------|---------|:--------:|
 | bucket\_key\_prefix | Prefix for AWS S3 bucket used to store AWS Config logs | `string` | `null` | no |
 | bucket\_name | AWS S3 bucket used to store AWS Config logs | `string` | `null` | no |
-| cmk\_trusted\_admin\_arns | Trusted ARNs that will have administrative permissions for AWS KMS CMK | `list(string)` | `[]` | no |
 | delivery\_frequency | Frequency for AWS Config to deliver configuration snapshots | `string` | `"Six_Hours"` | no |
 | enable\_recorder | Determines if the AWS Config recorder is active for the account | `bool` | `true` | no |
 | include\_global\_resource\_types | Determines if AWS Config is region agnostic for recorded resources | `bool` | `true` | no |
+| kms\_key\_trusted\_admin\_arns | Trusted ARNs that will have administrative permissions for AWS KMS CMK | `list(string)` | `[]` | no |
 | logs\_arn | ARN of the account to create the AWS S3 bucket and KMS CMK. If not specified, defaults to primary provider. | `string` | `null` | no |
 | maximum\_execution\_frequency | Default maximum frequency that AWS config evaluates rules | `string` | `"TwentyFour_Hours"` | no |
 | name | Name of AWS Config | `string` | `"account-config"` | no |

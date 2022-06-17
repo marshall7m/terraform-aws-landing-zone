@@ -108,7 +108,6 @@ module "base" {
 |------|---------|
 | terraform | >= 1.0.0 |
 | aws | >= 3.41.0 |
-| null | >=3.1.0 |
 | random | >=3.1.0 |
 
 ## Providers

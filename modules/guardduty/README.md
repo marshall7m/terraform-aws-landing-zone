@@ -5,7 +5,7 @@
 |------|---------|
 | terraform | >= 1.0.0 |
 | aws | >= 2.42 |
-| random | 3.1.0 |
+| random | >=3.1.0 |
 
 ## Providers
 
@@ -13,7 +13,7 @@
 |------|---------|
 | aws | >= 2.42 |
 | aws.logs | >= 2.42 |
-| random | 3.1.0 |
+| random | >=3.1.0 |
 
 ## Inputs
 
@@ -34,7 +34,7 @@
 
 | Name | Description |
 |------|-------------|
-| cmk\_arn | n/a |
+| kms\_key\_arn | n/a |
 | s3\_bucket\_arn | n/a |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
