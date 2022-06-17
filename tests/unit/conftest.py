@@ -1,1 +1,0 @@
-pytest_plugins  = ["terra_fixt"]

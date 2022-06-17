@@ -43,7 +43,7 @@ resource "aws_s3_bucket_acl" "this" {
   count    = var.create_gd_s3_bucket ? 1 : 0
   provider = aws.logs
   
-  bucket = aws_s3_bucket.this.id
+  bucket = aws_s3_bucket.this[0].id
   acl    = "private"
 }
 

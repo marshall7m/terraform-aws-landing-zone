@@ -1,5 +1,4 @@
 data "aws_caller_identity" "master" {}
-
 locals {
   child_accounts = [for account in var.child_accounts : defaults(account, {
     is_logs = false
