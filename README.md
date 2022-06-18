@@ -114,7 +114,7 @@ module "base" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.19.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.41.0 |
 
 ## Modules
 
