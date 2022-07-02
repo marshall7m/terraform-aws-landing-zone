@@ -80,13 +80,13 @@ variable "ct_is_active" {
 variable "ct_log_retention_days" {
   description = "Number of days Cloud Watch will retain the logs"
   type        = number
-  default = 14
+  default     = 14
 }
 
 variable "ct_name" {
   description = "Name of CloudTrail"
   type        = string
-  default = "org-cloudtrail"
+  default     = "org-cloudtrail"
 }
 
 #### CONFIG ####

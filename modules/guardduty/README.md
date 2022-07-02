@@ -48,9 +48,7 @@
 | <a name="input_deny_invalid_crypted_headers"></a> [deny\_invalid\_crypted\_headers](#input\_deny\_invalid\_crypted\_headers) | Determines if S3 bucket policy should deny invalid encryption headers | `bool` | `false` | no |
 | <a name="input_deny_uncrypted_uploads"></a> [deny\_uncrypted\_uploads](#input\_deny\_uncrypted\_uploads) | Determines if S3 bucket policy should deny unencrypted uploads | `bool` | `false` | no |
 | <a name="input_enable"></a> [enable](#input\_enable) | Determines if AWS Guard Duty should be active. (Suspends existing Guard Duty monitoring if set to false) | `bool` | `true` | no |
-| <a name="input_gd_arn"></a> [gd\_arn](#input\_gd\_arn) | IAM role ARN the primary provider will assume to create the AWS GuardDuty resources within its respective account. If not specified, defaults to the aws caller. | `string` | `null` | no |
 | <a name="input_is_organization_gd"></a> [is\_organization\_gd](#input\_is\_organization\_gd) | Determines if organization Guard Duty should be created | `bool` | `false` | no |
-| <a name="input_logs_arn"></a> [logs\_arn](#input\_logs\_arn) | IAM role ARN the `aws.logs` provider will assume to create the AWS S3 bucket and KMS CMK used to store GuardDuty findings. If not specified, defaults to the aws caller. | `string` | `null` | no |
 | <a name="input_trusted_iam_kms_admin_arns"></a> [trusted\_iam\_kms\_admin\_arns](#input\_trusted\_iam\_kms\_admin\_arns) | ARNs of IAM entities that will have administrative access to CMK key associated with Guard Duty | `list(string)` | n/a | yes |
 | <a name="input_trusted_iam_kms_usage_arns"></a> [trusted\_iam\_kms\_usage\_arns](#input\_trusted\_iam\_kms\_usage\_arns) | ARNs of IAM entities that will have the ability decrypt, read, reencrypt, and describe the CMK key | `list(string)` | `[]` | no |
 

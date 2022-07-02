@@ -54,7 +54,6 @@
 | <a name="input_is_organization_trail"></a> [is\_organization\_trail](#input\_is\_organization\_trail) | Determines if module should create an organization CloudTrail <br>Prereqs:<br>  - AWS Organization must already exists<br>  - Terraform AWS provider must be configured with organization master account | `bool` | `false` | no |
 | <a name="input_key_prefix"></a> [key\_prefix](#input\_key\_prefix) | S3 key prefix to put Cloud Trail logs under | `string` | `null` | no |
 | <a name="input_log_retention_days"></a> [log\_retention\_days](#input\_log\_retention\_days) | Number of days Cloud Watch will retain the logs | `number` | n/a | yes |
-| <a name="input_logs_arn"></a> [logs\_arn](#input\_logs\_arn) | ARN of the account to create the AWS S3 bucket and KMS CMK. If not specified, defaults to primary provider. | `string` | `null` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name of CloudTrail | `string` | n/a | yes |
 | <a name="input_trusted_iam_kms_admin_arns"></a> [trusted\_iam\_kms\_admin\_arns](#input\_trusted\_iam\_kms\_admin\_arns) | ARNs of IAM entities that will have administrative access to CMK key associated with Cloud Trail | `list(string)` | n/a | yes |
 | <a name="input_trusted_iam_kms_decrypt_arns"></a> [trusted\_iam\_kms\_decrypt\_arns](#input\_trusted\_iam\_kms\_decrypt\_arns) | ARNs of IAM entities that will have the ability to only decrypt the CMK key via it's associated AWS account's CloudTrail | `list(string)` | `[]` | no |

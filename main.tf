@@ -98,9 +98,9 @@ module "accounts" {
 }
 
 module "guardduty" {
-  source   = "./modules//guardduty"
+  source = "./modules//guardduty"
   providers = {
-    aws.gd = aws
+    aws.gd   = aws
     aws.logs = aws.logs
   }
   enable                       = var.gd_is_active
@@ -116,7 +116,7 @@ module "guardduty" {
 }
 
 module "cloudtrail" {
-  source   = "./modules//cloudtrail"
+  source = "./modules//cloudtrail"
   providers = {
     aws.logs = aws.logs
   }
@@ -131,7 +131,7 @@ module "cloudtrail" {
 module "org_cfg" {
   source = "./modules//org-config"
   providers = {
-    aws.cfg = aws.cfg
+    aws.cfg  = aws.cfg
     aws.logs = aws.logs
   }
 
