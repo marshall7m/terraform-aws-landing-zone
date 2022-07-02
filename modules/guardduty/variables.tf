@@ -1,15 +1,3 @@
-variable "logs_arn" {
-  description = "IAM role ARN the `aws.logs` provider will assume to create the AWS S3 bucket and KMS CMK used to store GuardDuty findings. If not specified, defaults to the aws caller."
-  type        = string
-  default     = null
-}
-
-variable "gd_arn" {
-  description = "IAM role ARN the primary provider will assume to create the AWS GuardDuty resources within its respective account. If not specified, defaults to the aws caller."
-  type        = string
-  default     = null
-}
-
 variable "enable" {
   description = "Determines if AWS Guard Duty should be active. (Suspends existing Guard Duty monitoring if set to false)"
   type        = bool

@@ -1,9 +1,3 @@
-variable "logs_arn" {
-  description = "ARN of the account to create the AWS S3 bucket and KMS CMK. If not specified, defaults to primary provider."
-  type        = string
-  default     = null
-}
-
 variable "enable_logging" {
   description = "Determines if logging is enabled for Cloud Trail"
   type        = bool

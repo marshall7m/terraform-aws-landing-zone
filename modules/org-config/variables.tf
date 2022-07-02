@@ -1,15 +1,3 @@
-variable "cfg_role_arn" {
-  description = "AWS IAM role ARN the AWS provider will assume to create AWS Config resources in"
-  type        = string
-  default     = null
-}
-
-variable "logs_role_arn" {
-  description = "AWS IAM role ARN the AWS provider will assume to create AWS S3 bucket and AWS KMS CMK to store AWS Config history"
-  type        = string
-  default     = null
-}
-
 variable "aggregator_name" {
   description = "Name for AWS Config aggregator"
   type        = string

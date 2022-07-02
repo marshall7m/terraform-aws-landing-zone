@@ -5,23 +5,13 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 2.42"
+      configuration_aliases = [
+        aws.logs, aws.gd
+      ]
     }
     random = {
       source  = "hashicorp/random"
       version = ">=3.1.0"
     }
-  }
-}
-
-provider "aws" {
-  assume_role {
-    role_arn = var.logs_arn
-  }
-  alias = "logs"
-}
-
-provider "aws" {
-  assume_role {
-    role_arn = var.gd_arn
   }
 }

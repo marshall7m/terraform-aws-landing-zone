@@ -33,12 +33,6 @@ variable "account_policies" {
 
 #### GUARDDUTY ####
 
-variable "enable_gd" {
-  description = "Determines if organization-level Guard Duty should be used"
-  type        = bool
-  default     = true
-}
-
 variable "gd_is_active" {
   description = "Determines if Guard Duty is active (only suspends Guard Duty activity if false)"
   type        = bool
@@ -86,11 +80,13 @@ variable "ct_is_active" {
 variable "ct_log_retention_days" {
   description = "Number of days Cloud Watch will retain the logs"
   type        = number
+  default = 14
 }
 
 variable "ct_name" {
   description = "Name of CloudTrail"
   type        = string
+  default = "org-cloudtrail"
 }
 
 #### CONFIG ####

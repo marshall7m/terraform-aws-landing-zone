@@ -12,3 +12,17 @@ terraform {
     }
   }
 }
+
+provider "aws" {
+  assume_role {
+    role_arn = local.logs_org_role_arn
+  }
+  alias = "logs"
+}
+
+provider "aws" {
+  assume_role {
+    role_arn = local.cfg_org_role_arn
+  }
+  alias = "cfg"
+}

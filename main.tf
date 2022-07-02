@@ -4,16 +4,21 @@ locals {
     is_logs = false
     is_cfg  = false
   })]
+
   logs_org_role_arn = one([for account in local.child_accounts :
   module.accounts.child_accounts[account.name].role_arn if account.is_logs])
+
   cfg_org_role_arn = one([for account in local.child_accounts :
   module.accounts.child_accounts[account.name].role_arn if account.is_cfg])
+
   cfg_managed_rules = [for rule in var.cfg_managed_rules : defaults(rule, {
     exclude_root = false
   })]
+
   cfg_custom_rules = [for rule in var.cfg_custom_rules : defaults(rule, {
     exclude_root = false
   })]
+
   default_managed_rules = [
     merge(
       {
@@ -36,7 +41,6 @@ locals {
       {
         description     = "Checks if GuardDuty is enabled within config AWS account"
         rule_identifier = "GUARDDUTY_ENABLED_CENTRALIZED"
-        description     = ""
         input_parameters = {
           CentralMonitoringAccount = data.aws_arn.cfg_org_role_arn.account
         }
@@ -95,14 +99,10 @@ module "accounts" {
 
 module "guardduty" {
   source   = "./modules//guardduty"
-  logs_arn = local.logs_org_role_arn
-  /*
-  used as a workaround to implicitly create a dependency on 
-  `aws_guardduty_organization_admin_account` given modules can't use depends_on when
-  provider configurations are configured at runtime
-  */
-  gd_arn = aws_guardduty_organization_admin_account.cfg_account.id != null ? local.cfg_org_role_arn : local.cfg_org_role_arn
-
+  providers = {
+    aws.gd = aws
+    aws.logs = aws.logs
+  }
   enable                       = var.gd_is_active
   is_organization_gd           = true
   create_gd_s3_bucket          = var.create_gd_s3_bucket
@@ -110,17 +110,42 @@ module "guardduty" {
   trusted_iam_kms_admin_arns   = ["arn:aws:iam::${data.aws_caller_identity.master.id}:root"]
   deny_uncrypted_uploads       = var.gd_deny_uncrypted_uploads
   deny_invalid_crypted_headers = var.gd_deny_invalid_crypted_headers
+  depends_on = [
+    aws_guardduty_organization_admin_account.cfg_account
+  ]
 }
 
 module "cloudtrail" {
   source   = "./modules//cloudtrail"
-  logs_arn = local.logs_org_role_arn
+  providers = {
+    aws.logs = aws.logs
+  }
 
   enable_logging             = var.ct_is_active
   is_organization_trail      = true
   name                       = var.ct_name
   log_retention_days         = var.ct_log_retention_days
   trusted_iam_kms_admin_arns = ["arn:aws:iam::${data.aws_caller_identity.master.id}:root"]
+}
+
+module "org_cfg" {
+  source = "./modules//org-config"
+  providers = {
+    aws.cfg = aws.cfg
+    aws.logs = aws.logs
+  }
+
+  managed_rules = [for rule in concat(local.cfg_managed_rules,
+    [for default_rule in local.default_managed_rules : default_rule.enable ? default_rule : null]) :
+    merge(rule, {
+      excluded_accounts = concat(rule.exclude_root ? [data.aws_caller_identity.master.id] : [], [for name in rule.excluded_accounts : module.accounts.child_accounts[name].id])
+    })
+  ]
+  custom_rules = [for rule in local.cfg_custom_rules :
+    merge(rule, {
+      excluded_accounts = concat(rule.exclude_root ? [data.aws_caller_identity.master.id] : [], [for name in rule.excluded_accounts : module.accounts.child_accounts[name].id])
+    })
+  ]
 }
 
 
@@ -152,26 +177,4 @@ resource "aws_organizations_delegated_administrator" "guardduty" {
 
 resource "aws_guardduty_organization_admin_account" "cfg_account" {
   admin_account_id = data.aws_arn.cfg_org_role_arn.account
-}
-
-module "org_cfg" {
-  source = "./modules//org-config"
-  providers = {
-    aws.master = aws
-  }
-
-  logs_role_arn = local.logs_org_role_arn
-  cfg_role_arn  = local.cfg_org_role_arn
-
-  managed_rules = [for rule in concat(local.cfg_managed_rules,
-    [for default_rule in local.default_managed_rules : default_rule.enable ? default_rule : null]) :
-    merge(rule, {
-      excluded_accounts = concat(rule.exclude_root ? [data.aws_caller_identity.master.id] : [], [for name in rule.excluded_accounts : module.accounts.child_accounts[name].id])
-    })
-  ]
-  custom_rules = [for rule in local.cfg_custom_rules :
-    merge(rule, {
-      excluded_accounts = concat(rule.exclude_root ? [data.aws_caller_identity.master.id] : [], [for name in rule.excluded_accounts : module.accounts.child_accounts[name].id])
-    })
-  ]
 }
