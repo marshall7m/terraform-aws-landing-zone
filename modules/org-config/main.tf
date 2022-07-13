@@ -116,25 +116,3 @@ resource "aws_config_configuration_recorder_status" "this" {
   is_enabled = true
   depends_on = [aws_config_delivery_channel.this]
 }
-
-/* 
-Need to explicitly create AWS Config recorder within master organization account
-to enable rules within master account
-*/
-# resource "aws_iam_service_linked_role" "master" {
-#   provider         = aws.master
-#   aws_service_name = "config.amazonaws.com"
-# }
-
-# resource "aws_config_configuration_recorder" "master" {
-#   count    = var.enable_recorder ? 1 : 0
-#   provider = aws.master
-
-#   name     = coalesce(var.recorder_name, "${local.org_id}-cfg-recorder")
-#   role_arn = aws_iam_service_linked_role.master.arn
-
-#   recording_group {
-#     all_supported                 = true
-#     include_global_resource_types = var.include_global_resource_types
-#   }
-# }
